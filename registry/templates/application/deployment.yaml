@@ -50,13 +50,18 @@ spec:
           ports:
             - containerPort: {{ .Values.application.service.containerPort }}
               protocol: {{ .Values.application.service.protocol }}
+            - containerPort: {{ .Values.application.metrics.containerPort }}
+              protocol: {{ .Values.application.service.protocol }}
           resources:
             {{- toYaml .Values.application.resources | nindent 12 }}
+          env:
+            - name: REGISTRY_DB_HOST
+              value: {{ include "db.fullname" . }}
           volumeMounts:
-            - name: setting-trigg
+            - name: setting-trig
               mountPath: /data
               readOnly: true
       volumes:
-        - name: setting-trigg
+        - name: setting-trig
           configMap:
             name: "setting-{{ include "application.fullname" . }}"

@@ -9,10 +9,18 @@ spec:
   type: {{ .Values.application.service.type }}
   ports:
     - port: {{ .Values.application.service.port }}
+      name: service
       targetPort: {{ .Values.application.service.targetPort }}
       protocol: {{ .Values.application.service.protocol }}
       {{- if and (or (eq .Values.application.service.type "NodePort") (eq .Values.application.service.type "LoadBalancer")) (not (empty .Values.application.service.nodePort)) }}
       nodePort: {{ .Values.application.service.nodePort }}
+      {{ end }}
+    - port: {{ .Values.application.metrics.port }}
+      name: metrics
+      targetPort: {{ .Values.application.metrics.targetPort }}
+      protocol: {{ .Values.application.metrics.protocol }}
+      {{- if and (or (eq .Values.application.metrics.type "NodePort") (eq .Values.application.metrics.type "LoadBalancer")) (not (empty .Values.application.metrics.nodePort)) }}
+      nodePort: {{ .Values.application.metrics.nodePort }}
       {{ end }}
   selector:
     {{- include "application.selectorLabels" . | nindent 4 }}
