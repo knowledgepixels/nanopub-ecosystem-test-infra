@@ -51,7 +51,7 @@ spec:
             - containerPort: {{ .Values.application.service.containerPort }}
               protocol: {{ .Values.application.service.protocol }}
             - containerPort: {{ .Values.application.metrics.containerPort }}
-              protocol: {{ .Values.application.service.protocol }}
+              protocol: {{ .Values.application.metrics.protocol }}
           resources:
             {{- toYaml .Values.application.resources | nindent 12 }}
           env:

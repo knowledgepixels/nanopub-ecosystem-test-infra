@@ -13,10 +13,10 @@ enablerNodeSelector: {}
 application:
   tier: external
   image:
-    repository: docker.io/nanopub/registry
-    pullPolicy: Always
-    # Overrides the image tag whose default is the chart appVersion.
+    repository: docker.io/kb/registry
+    pullPolicy: IfNotPresent
     tag: "latest"
+    # Overrides the image tag whose default is the chart appVersion.
 
   replicaCount: 1
 
@@ -123,8 +123,8 @@ db:
     exampleEnvVar: exampleValue
 
   persistence:
-    hostPath: /
-    mountPath: /data
+    hostPath: /data/mongodb
+    mountPath: /data/db
     accessModes:
       - ReadWriteOnce
     size: 50Mi
