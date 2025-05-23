@@ -26,10 +26,7 @@ application:
     targetPort: 9012
     containerPort: 9012
     protocol: TCP
-
-  # The specification of the resources is needed for the proper functioning 
-  # of the Smart Orchestrator enabler (requests)
-  # and of the Resource provisioning enabler (limits)
+    
   resources: {}
     # limits:
     #   cpu: 100m
@@ -85,9 +82,6 @@ db:
     containerPort: 27017
     protocol: TCP
 
-  # The specification of the resources is needed for the proper functioning 
-  # of the Smart Orchestrator enabler (requests)
-  # and of the Resource provisioning enabler (limits)
   resources: {}
     # limits:
     #   cpu: 100m

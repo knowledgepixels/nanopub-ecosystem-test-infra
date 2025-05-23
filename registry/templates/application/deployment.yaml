@@ -52,3 +52,11 @@ spec:
               protocol: {{ .Values.application.service.protocol }}
           resources:
             {{- toYaml .Values.application.resources | nindent 12 }}
+          volumeMounts:
+            - name: setting-trigg
+              mountPath: /data
+              readOnly: true
+      volumes:
+        - name: setting-trigg
+          configMap:
+            name: "setting-{{ include "application.fullname" . }}"
