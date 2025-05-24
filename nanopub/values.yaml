@@ -1,0 +1,7 @@
+query:
+  rdf4j:
+    replicaCount: 2
+
+registry:
+  db:
+    replicaCount: 2

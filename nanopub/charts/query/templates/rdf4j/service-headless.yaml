@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rdf4j.svc.headless" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "rdf4j.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - port: {{ .Values.rdf4j.service.port }}
+      targetPort: {{ .Values.rdf4j.service.targetPort }}
+      protocol: {{ .Values.rdf4j.service.protocol }}
+  selector:
+    {{- include "rdf4j.selectorLabels" . | nindent 4 }}

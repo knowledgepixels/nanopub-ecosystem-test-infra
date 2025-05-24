@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "application.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.application.service.type }}
+  ports:
+    - name: service
+      port: {{ .Values.application.service.port }}
+      targetPort: {{ .Values.application.service.targetPort }}
+      protocol: {{ .Values.application.service.protocol }}
+      {{- if and (or (eq .Values.application.service.type "NodePort") (eq .Values.application.service.type "LoadBalancer")) (not (empty .Values.application.service.nodePort)) }}
+      nodePort: {{ .Values.application.service.nodePort }}
+      {{ end }}
+    - name: metrics
+      port: {{ .Values.application.metrics.port }}
+      targetPort: {{ .Values.application.metrics.targetPort }}
+      protocol: {{ .Values.application.metrics.protocol }}
+      {{- if and (or (eq .Values.application.metrics.type "NodePort") (eq .Values.application.metrics.type "LoadBalancer")) (not (empty .Values.application.metrics.nodePort)) }}
+      nodePort: {{ .Values.application.metrics.nodePort }}
+      {{ end }}
+  selector:
+    {{- include "application.selectorLabels" . | nindent 4 }}
