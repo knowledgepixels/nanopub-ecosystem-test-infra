@@ -21,15 +21,9 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.enablerNodeSelector }}
+      {{- if .Values.global.nodeSelectorLabel }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if not .Values.enablerNodeSelector }}
-        {{- with .Values.application.nodeSelector }}
-      nodeSelector:
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
+          nodeSelectorLabel: {{ .Values.global.nodeSelectorLabel | quote }}
       {{- end }}
       {{- with .Values.application.affinity }}
       affinity:
@@ -64,4 +58,4 @@ spec:
             - name: ENDPOINT_BASE
               value: "http://{{ include "rdf4j.fullname" .}}:8080/rdf4j-server/"
             - name: REGISTRY_FIXED_URL
-              value: "http://test-registry-application:9292/"
+              value: "http://{{ .Release.Name }}-registry-application:9292/"

@@ -22,15 +22,9 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.enablerNodeSelector }}
+      {{- if .Values.global.nodeSelectorLabel }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if not .Values.enablerNodeSelector }}
-        {{- with .Values.rdf4j.nodeSelector }}
-      nodeSelector:
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
+          nodeSelectorLabel: {{ .Values.global.nodeSelectorLabel | quote }}
       {{- end }}
       {{- with .Values.rdf4j.affinity }}
       affinity:
@@ -65,8 +59,6 @@ spec:
             - name: JAVA_OPTS
               value: "-Dorg.eclipse.rdf4j.client.http.connectionTimeout=10000 -Dorg.eclipse.rdf4j.client.http.connectionRequestTimeout=10000 -Dorg.eclipse.rdf4j.client.http.socketTimeout=10000"
           {{- end }}
-      imagePullSecrets:
-        - name: registry-credentials
   volumeClaimTemplates:
     - metadata:
         name: "rdf4j-data-{{include "rdf4j.fullname" .}}"

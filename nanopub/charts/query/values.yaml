@@ -2,8 +2,6 @@ nameOverride: "new"
 
 fullnameOverride: ""
 
-enablerNodeSelector: {}
-
 # Component application values
 application:
   tier: external

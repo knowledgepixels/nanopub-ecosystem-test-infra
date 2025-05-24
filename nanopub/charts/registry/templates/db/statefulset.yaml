@@ -22,15 +22,9 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.enablerNodeSelector }}
+      {{- if .Values.global.nodeSelectorLabel }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if not .Values.enablerNodeSelector }}
-        {{- with .Values.db.nodeSelector }}
-      nodeSelector:
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
+          nodeSelectorLabel: {{ .Values.global.nodeSelectorLabel | quote }}
       {{- end }}
       {{- with .Values.db.affinity }}
       affinity:

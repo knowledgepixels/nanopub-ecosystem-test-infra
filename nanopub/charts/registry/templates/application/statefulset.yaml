@@ -22,15 +22,9 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.enablerNodeSelector }}
+      {{- if .Values.global.nodeSelectorLabel }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if not .Values.enablerNodeSelector }}
-        {{- with .Values.application.nodeSelector }}
-      nodeSelector:
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
+          nodeSelectorLabel: {{ .Values.global.nodeSelectorLabel | quote }}
       {{- end }}
       {{- with .Values.application.affinity }}
       affinity:
@@ -58,6 +52,8 @@ spec:
           env:
             - name: REGISTRY_DB_HOST
               value: {{ include "db.fullname" . }}
+            - name: REGISTRY_PEER_URLS
+              value: https://registry.petapico.org/;https://registry.knowledgepixels.com/
           volumeMounts:
             - name: setting-trig
               mountPath: /data

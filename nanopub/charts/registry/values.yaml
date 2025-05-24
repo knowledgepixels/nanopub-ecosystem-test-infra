@@ -85,7 +85,7 @@ db:
   replicaCount: 1
   service:
     type: NodePort
-    nodePort: "30001"
+    nodePort: ""
     port: 27017
     targetPort: 27017
     containerPort: 27017
