@@ -57,6 +57,10 @@ spec:
           env:
             - name: ENDPOINT_TYPE
               value: "rdf4j"
+            - name: RDF4J_PROXY_HOST
+              value: "{{ include "rdf4j.fullname" . }}"
+            - name: RDF4J_PROXY_PORT
+              value: "{{ .Values.rdf4j.service.containerPort }}"
             - name: ENDPOINT_BASE
               value: "http://{{ include "rdf4j.fullname" .}}:8080/rdf4j-server/"
             - name: REGISTRY_FIXED_URL
