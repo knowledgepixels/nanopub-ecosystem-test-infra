@@ -18,17 +18,25 @@ application:
   service:
     type: NodePort
     nodePort: ""
-    port: 9292
-    targetPort: 9292
-    containerPort: 9292
+    port: 9393
+    targetPort: 9393
+    containerPort: 9393
+    protocol: TCP
+
+  httpService:
+    type: NodePort
+    nodePort: ""
+    port: 9300
+    targetPort: 9300
+    containerPort: 9300
     protocol: TCP
 
   metrics:
     type: NodePort
     nodePort: ""
-    port: 9293
-    targetPort: 9293
-    containerPort: 9293
+    port: 9394
+    targetPort: 9394
+    containerPort: 9394
     protocol: TCP
 
   resources: {}
@@ -80,19 +88,11 @@ glrc:
   replicaCount: 1
 
   service:
-    type: NodePort
+    type: ClusterIP
     nodePort: ""
-    port: 9292
-    targetPort: 9292
-    containerPort: 9292
-    protocol: TCP
-
-  metrics:
-    type: NodePort
-    nodePort: ""
-    port: 9293
-    targetPort: 9293
-    containerPort: 9293
+    port: 80
+    targetPort: 80
+    containerPort: 80
     protocol: TCP
 
   resources: {}
