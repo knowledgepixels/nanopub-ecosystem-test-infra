@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "glrc.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "glrc.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.glrc.service.type }}
+  ports:
+    - name: service
+      port: {{ .Values.glrc.service.port }}
+      targetPort: {{ .Values.glrc.service.targetPort }}
+      protocol: {{ .Values.glrc.service.protocol }}
+      {{- if and (or (eq .Values.glrc.service.type "NodePort") (eq .Values.glrc.service.type "LoadBalancer")) (not (empty .Values.glrc.service.nodePort)) }}
+      nodePort: {{ .Values.glrc.service.nodePort }}
+      {{ end }}
+  selector:
+    {{- include "glrc.selectorLabels" . | nindent 4 }}

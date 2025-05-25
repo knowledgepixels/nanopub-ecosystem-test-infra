@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: general-registry-service
+  namespace: default
+spec:
+  type: LoadBalancer
+  ports:
+    - name: service
+      port: 9292
+      targetPort: 9292
+      protocol: TCP
+      nodePort: 30782
+  selector:
+    app.kubernetes.io/component: application
+    query: registry

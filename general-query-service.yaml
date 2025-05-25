@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: general-query-service
+  namespace: default
+spec:
+  type: LoadBalancer
+  ports:
+    - name: service
+      port: 9393
+      targetPort: 9393
+      protocol: TCP
+      nodePort: 31272
+    - name: http-service
+      port: 9300
+      targetPort: 9300
+      protocol: TCP
+      nodePort: 31273
+  selector:
+    app.kubernetes.io/component: application
+    query: query
