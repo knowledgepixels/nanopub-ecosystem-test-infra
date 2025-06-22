@@ -150,28 +150,28 @@ tier: {{ .Values.rdf4j.tier }}
 {{- end }}
 
 {{/*
-Name of the component glrc.
+Name of the component grlc.
 */}}
-{{- define "glrc.name" -}}
-{{- printf "%s-glrc" (include "query.name" .) | trunc 63 | trimSuffix "-" }}
+{{- define "grlc.name" -}}
+{{- printf "%s-grlc" (include "query.name" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
-Create a default fully qualified component glrc name.
+Create a default fully qualified component grlc name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "glrc.fullname" -}}
-{{- printf "%s-glrc" (include "query.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- define "grlc.fullname" -}}
+{{- printf "%s-grlc" (include "query.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 
 {{/*
-Component glrc labels
+Component grlc labels
 */}}
-{{- define "glrc.labels" -}}
+{{- define "grlc.labels" -}}
 helm.sh/chart: {{ include "query.chart" . }}
-{{ include "glrc.selectorLabels" . }}
+{{ include "grlc.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -179,13 +179,13 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Component glrc selector labels
+Component grlc selector labels
 */}}
-{{- define "glrc.selectorLabels" -}}
+{{- define "grlc.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "query.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 query: {{ .Chart.Name }}
-app.kubernetes.io/component: glrc
+app.kubernetes.io/component: grlc
 isMainInterface: "yes"
-tier: {{ .Values.glrc.tier }}
+tier: {{ .Values.grlc.tier }}
 {{- end }}

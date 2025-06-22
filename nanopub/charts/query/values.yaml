@@ -75,7 +75,7 @@ application:
   affinity: {}
 
 # Component application values
-glrc:
+grlc:
   tier: external
   image:
     repository: docker.io/clariah/grlc

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "grlc.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "grlc.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.grlc.autoscaling.enabled }}
+  replicas: {{ .Values.grlc.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "grlc.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "grlc.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.grlc.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.global.nodeSelectorLabel }}
+      nodeSelector:
+          nodeSelectorLabel: {{ .Values.global.nodeSelectorLabel | quote }}
+      {{- end }}
+      {{- with .Values.grlc.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.grlc.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.grlc.podSecurityContext | nindent 8 }}
+      containers:
+        - name: grlc
+          securityContext:
+            {{- toYaml .Values.grlc.securityContext | nindent 12 }}
+          image: "{{ .Values.grlc.image.repository }}:{{ .Values.grlc.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.grlc.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.grlc.service.containerPort }}
+              protocol: {{ .Values.grlc.service.protocol }}
+          resources:
+            {{- toYaml .Values.grlc.resources | nindent 12 }}
