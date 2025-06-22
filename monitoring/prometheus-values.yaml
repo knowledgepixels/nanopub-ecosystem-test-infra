@@ -1,0 +1,57 @@
+server:
+  service:
+    type: NodePort
+    nodePort: "31165"
+
+      
+  remoteWrite:
+    - url: http://vms-victoria-metrics-single-server:8428/api/v1/write
+
+extraScrapeConfigs: |
+  - job_name: 'registry-pods'
+    scrape_interval: 30s
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+        action: keep
+        regex: application
+        target_label: component
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+        action: keep
+        regex: registry
+        target_label: name
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+        target_label: component
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+        target_label: name
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_instance]
+        target_label: instance
+      - source_labels: [__address__]
+        regex: (.+):\d+
+        target_label: __address__
+        replacement: $1:9293
+
+  - job_name: 'query-pods'
+    scrape_interval: 30s
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+        action: keep
+        regex: application
+        target_label: component
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+        action: keep
+        regex: query
+        target_label: name
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+        target_label: component
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+        target_label: name
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_instance]
+        target_label: instance
+      - source_labels: [__address__]
+        regex: (.+):\d+
+        target_label: __address__
+        replacement: $1:9394
