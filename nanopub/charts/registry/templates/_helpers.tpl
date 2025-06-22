@@ -149,7 +149,6 @@ Component db selector labels
 {{- define "db.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "registry.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-registry: {{ .Chart.Name }}
 app.kubernetes.io/component: db
 isMainInterface: "no"
 tier: {{ .Values.db.tier }}

@@ -97,7 +97,6 @@ Component application selector labels
 {{- define "application.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "query.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-query: {{ .Chart.Name }}
 app.kubernetes.io/component: application
 isMainInterface: "yes"
 tier: {{ .Values.application.tier }}
