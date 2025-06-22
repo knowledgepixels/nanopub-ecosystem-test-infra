@@ -1,0 +1,6 @@
+server:
+  service:
+    type: NodePort
+    nodePort: "31333"
+  # specify for how long is data retained in the database
+  retentionPeriod: 1y

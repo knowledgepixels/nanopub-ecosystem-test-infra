@@ -1,0 +1,27 @@
+service:
+  type: NodePort
+  nodePort: "31430"
+
+env:
+  GF_AUTH_ANONYMOUS_ENABLED: "true"
+  GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+  GF_AUTH_DISABLE_LOGIN_FORM: "true"
+  GF_AUTH_BASIC_ENABLED: "false"
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: VictoriaMetrics
+        type: prometheus
+        access: proxy
+        url: http://vms-victoria-metrics-single-server:8428
+        isDefault: true
+        version: 1
+
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus-server:80
+        isDefault: false
+        version: 1
