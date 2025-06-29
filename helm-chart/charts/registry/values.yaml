@@ -1,0 +1,125 @@
+# Default values for enabler.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# String to partially override enabler.fullname template (will maintain the release name)
+nameOverride: ""
+# String to fully override enabler.fullname template
+fullnameOverride: ""
+# Deploy all the components in the same node
+enablerNodeSelector: {}
+
+# Component application values
+application:
+  tier: external
+  image:
+    repository: docker.io/nanopub/registry
+    pullPolicy: IfNotPresent
+    tag: "latest"
+    # Overrides the image tag whose default is the chart appVersion.
+
+  replicaCount: 1
+
+  registryPeerUrls: ""
+
+  service:
+    type: NodePort
+    nodePort: ""
+    port: 9292
+    targetPort: 9292
+    containerPort: 9292
+    protocol: TCP
+
+  metrics:
+    type: NodePort
+    nodePort: ""
+    port: 9293
+    targetPort: 9293
+    containerPort: 9293
+    protocol: TCP
+
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  imagePullSecrets: []
+  tolerations: []
+  affinity: {}
+
+# Component db values
+db:
+  tier: internal
+  image:
+    repository: docker.io/library/mongo
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "7"
+
+  replicaCount: 1
+  service:
+    type: NodePort
+    nodePort: ""
+    port: 27017
+    targetPort: 27017
+    containerPort: 27017
+    protocol: TCP
+
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+
+  persistence:
+    hostPath: /data/mongodb
+    mountPath: /data/db
+    accessModes:
+      - ReadWriteOnce
+    size: 50Mi
+
+  imagePullSecrets: []
+  tolerations: []
+  affinity: {}

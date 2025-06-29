@@ -1,19 +1,12 @@
-# Default values for enabler.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-# String to partially override enabler.fullname template (will maintain the release name)
 nameOverride: ""
-# String to fully override enabler.fullname template
+
 fullnameOverride: ""
-# Deploy all the components in the same node
-enablerNodeSelector: {}
 
 # Component application values
 application:
   tier: external
   image:
-    repository: docker.io/nanopub/registry
+    repository: docker.io/nanopub/query
     pullPolicy: IfNotPresent
     tag: "latest"
     # Overrides the image tag whose default is the chart appVersion.
@@ -23,17 +16,25 @@ application:
   service:
     type: NodePort
     nodePort: ""
-    port: 9292
-    targetPort: 9292
-    containerPort: 9292
+    port: 9393
+    targetPort: 9393
+    containerPort: 9393
+    protocol: TCP
+
+  httpService:
+    type: NodePort
+    nodePort: ""
+    port: 9300
+    targetPort: 9300
+    containerPort: 9300
     protocol: TCP
 
   metrics:
     type: NodePort
     nodePort: ""
-    port: 9293
-    targetPort: 9293
-    containerPort: 9293
+    port: 9394
+    targetPort: 9394
+    containerPort: 9394
     protocol: TCP
 
   resources: {}
@@ -62,33 +63,76 @@ application:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  # Include here the environment variables to be used in the component's manifest (container section).
-  # Here and in the manifest is included an example.
-  envVars:
-    exampleEnvVar: exampleValue
-
-
   imagePullSecrets: []
-  nodeSelector: {}
   tolerations: []
   affinity: {}
 
-# Component db values
-db:
+# Component application values
+glrc:
+  tier: external
+  image:
+    repository: docker.io/clariah/grlc
+    pullPolicy: IfNotPresent
+    tag: "v1.3.9"
+    # Overrides the image tag whose default is the chart appVersion.
+
+  replicaCount: 1
+
+  service:
+    type: ClusterIP
+    nodePort: ""
+    port: 80
+    targetPort: 80
+    containerPort: 80
+    protocol: TCP
+
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+
+  imagePullSecrets: []
+  tolerations: []
+  affinity: {}
+
+# Component rdf4j values
+rdf4j:
   tier: internal
   image:
-    repository: docker.io/library/mongo
-    pullPolicy: Always
+    repository: docker.io/nanopub/rdf4j-workbench
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "7"
+    tag: "5.1.3-SNAPSHOT"
 
   replicaCount: 1
   service:
     type: NodePort
     nodePort: ""
-    port: 27017
-    targetPort: 27017
-    containerPort: 27017
+    port: 8080
+    targetPort: 8080
+    containerPort: 8080
     protocol: TCP
 
   resources: {}
@@ -117,19 +161,24 @@ db:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  # Include here the environment variables to be used in the component's manifest (container section).
-  # Here and in the manifest is included an example.
-  envVars:
-    exampleEnvVar: exampleValue
-
   persistence:
-    hostPath: /data/mongodb
-    mountPath: /data/db
+    mountPath: /var/rdf4j
     accessModes:
       - ReadWriteOnce
     size: 50Mi
 
+  persistenceLogs:
+    mountPath: /usr/local/tomcat/logs
+    accessModes:
+      - ReadWriteOnce
+    size: 5Mi
+
+  persistenceInfo:
+    mountPath: /var/info
+    accessModes:
+      - ReadWriteOnce
+    size: 5Mi
+
   imagePullSecrets: []
-  nodeSelector: {}
   tolerations: []
   affinity: {}
