@@ -1,0 +1,11 @@
+[project]
+name = "nanopub-generator"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "faker==37.4.0",
+    "httpx==0.28.1",
+    "nanopub==2.0.1",
+    "schedule==1.2.2",
+]
