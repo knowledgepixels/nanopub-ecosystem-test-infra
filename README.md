@@ -57,5 +57,5 @@ All of the above can be automatically configured and deployed using the `multi-n
 By default, the Registry instances are deployed in test mode - so that they do not propagate changes to the main nanopublication network. Peer URLs are generated automatically through the script.
 
 ```
-./multi-node-setup.sh
+./multi-node-setup.sh <replica-number>
 ```
