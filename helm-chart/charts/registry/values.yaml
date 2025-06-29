@@ -20,6 +20,8 @@ application:
 
   replicaCount: 1
 
+  registryPeerUrls: ""
+
   service:
     type: NodePort
     nodePort: ""
@@ -62,14 +64,7 @@ application:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  # Include here the environment variables to be used in the component's manifest (container section).
-  # Here and in the manifest is included an example.
-  envVars:
-    exampleEnvVar: exampleValue
-
-
   imagePullSecrets: []
-  nodeSelector: {}
   tolerations: []
   affinity: {}
 
@@ -117,10 +112,6 @@ db:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  # Include here the environment variables to be used in the component's manifest (container section).
-  # Here and in the manifest is included an example.
-  envVars:
-    exampleEnvVar: exampleValue
 
   persistence:
     hostPath: /data/mongodb
@@ -130,6 +121,5 @@ db:
     size: 50Mi
 
   imagePullSecrets: []
-  nodeSelector: {}
   tolerations: []
   affinity: {}

@@ -63,14 +63,7 @@ application:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  # Include here the environment variables to be used in the component's manifest (container section).
-  # Here and in the manifest is included an example.
-  envVars:
-    exampleEnvVar: exampleValue
-
-
   imagePullSecrets: []
-  nodeSelector: {}
   tolerations: []
   affinity: {}
 
@@ -119,14 +112,8 @@ glrc:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  # Include here the environment variables to be used in the component's manifest (container section).
-  # Here and in the manifest is included an example.
-  envVars:
-    exampleEnvVar: exampleValue
-
 
   imagePullSecrets: []
-  nodeSelector: {}
   tolerations: []
   affinity: {}
 
@@ -174,9 +161,6 @@ rdf4j:
     # runAsNonRoot: true
     # runAsUser: 1000
 
-  # Include here the environment variables to be used in the component's manifest (container section).
-  # Here and in the manifest is included an example.
-
   persistence:
     mountPath: /var/rdf4j
     accessModes:
@@ -195,10 +179,6 @@ rdf4j:
       - ReadWriteOnce
     size: 5Mi
 
-  envVars:
-    exampleEnvVar: exampleValue
-
   imagePullSecrets: []
-  nodeSelector: {}
   tolerations: []
   affinity: {}

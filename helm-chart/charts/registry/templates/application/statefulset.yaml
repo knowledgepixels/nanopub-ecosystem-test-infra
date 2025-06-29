@@ -52,8 +52,12 @@ spec:
           env:
             - name: REGISTRY_DB_HOST
               value: {{ include "db.fullname" . }}
+            - name: REGISTRY_TEST_INSTANCE
+              value: "true"
+            - name: REGISTRY_SERVICE_URL
+              value: "http://{{ include "application.fullname" . }}:{{ .Values.application.service.port }}"
             - name: REGISTRY_PEER_URLS
-              value: https://registry.petapico.org/;https://registry.knowledgepixels.com/
+              value: {{ .Values.application.registryPeerUrls | quote }}
           volumeMounts:
             - name: setting-trig
               mountPath: /data
