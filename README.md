@@ -4,7 +4,7 @@ This repository contains the test infrastructure configuration of the Nanopublic
 
 The `helm-chart` directory contains separate subcharts for Query ( as `query`) and Registry ( as `registry`) instances. They can be deployed separately or as a part of the larger `nanopub` chart. If deployed as a part of the `nanopub` chart, both Query and Registry instances will be connected by default and can be configured to be deployed together on a separate node (through setting `global.nodeSelectorLabel` in the `helm-chart/values.yaml` file). 
 
-`general-query-service.yaml` and `general-registry-service.yaml` specify overarching services that will connect to all Query instances and all Registry instances in the cluster regardless of the release. The services use the default Kubernetes load balancer of your distribution.  
+`setup-files/general-query-service.yaml` and `setup-files/general-registry-service.yaml` specify overarching services that will connect to all Query instances and all Registry instances in the cluster regardless of the release. The services use the default Kubernetes load balancer of your distribution.  
 
 To deploy them as is, run:
 
@@ -59,3 +59,7 @@ By default, the Registry instances are deployed in test mode - so that they do n
 ```
 ./multi-node-setup.sh <replica-number>
 ```
+
+### Network test setup
+
+The skeleton of the network test setup using ChaosMesh has been added in the `network-setup` directory.

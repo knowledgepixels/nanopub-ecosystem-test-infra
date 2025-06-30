@@ -4,6 +4,7 @@ metadata:
   name: {{ include "application.fullname" . }}
   namespace: {{ .Release.Namespace | quote }}
   labels:
+    chaos-mesh.org/inject: enabled
     {{- include "application.labels" . | nindent 4 }}
 spec:
   serviceName: {{ include "application.fullname" . }}-headless

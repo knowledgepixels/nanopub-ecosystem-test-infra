@@ -50,36 +50,12 @@ spec:
           volumeMounts:
             - name: "info-{{include "rdf4j.fullname" .}}"
               mountPath: {{ .Values.rdf4j.persistenceInfo.mountPath | quote }}
-            - name: "rdf4j-data-{{include "rdf4j.fullname" .}}"
-              mountPath: {{ .Values.rdf4j.persistence.mountPath | quote }}
-            - name: "logs-{{include "rdf4j.fullname" .}}"
-              mountPath: {{ .Values.rdf4j.persistenceLogs.mountPath | quote }}
           {{- with .Values.rdf4j.envVars }}
           env:
             - name: JAVA_OPTS
               value: "-Dorg.eclipse.rdf4j.client.http.connectionTimeout=10000 -Dorg.eclipse.rdf4j.client.http.connectionRequestTimeout=10000 -Dorg.eclipse.rdf4j.client.http.socketTimeout=10000"
           {{- end }}
   volumeClaimTemplates:
-    - metadata:
-        name: "rdf4j-data-{{include "rdf4j.fullname" .}}"
-      spec:
-        accessModes:
-        {{- range .Values.rdf4j.persistence.accessModes }}
-          - {{ . | quote }}
-        {{- end }}
-        resources:
-          requests:
-            storage: {{ .Values.rdf4j.persistence.size | quote }}
-    - metadata:
-        name: "logs-{{include "rdf4j.fullname" .}}"
-      spec:
-        accessModes:
-        {{- range .Values.rdf4j.persistenceLogs.accessModes }}
-          - {{ . | quote }}
-        {{- end }}
-        resources:
-          requests:
-            storage: {{ .Values.rdf4j.persistenceLogs.size | quote }}
     - metadata:
         name: "info-{{include "rdf4j.fullname" .}}"
       spec:

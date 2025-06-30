@@ -28,6 +28,14 @@ spec:
       {{- end }}
       {{- with .Values.db.affinity }}
       affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: nodeSelectorLabel
+                operator: In
+                values:
+                - {{ .Values.global.nodeSelectorLabel | quote }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.db.tolerations }}

@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Change the storage provisioner to support multi-node setups and dynamically wait for pods
+# Before assigning the storage class
+
+minikube addons enable volumesnapshots -p dem
+minikube addons enable csi-hostpath-driver -p dem
+minikube addons disable storage-provisioner -p dem
+minikube addons disable default-storageclass -p dem
+kubectl patch storageclass standard -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+kubectl apply -f setup-files/storage.yaml
+
 # Add all the necessary Helm repositories
 
 helm repo add vm https://victoriametrics.github.io/helm-charts/
@@ -61,5 +71,5 @@ done
 
 # Apply the general services for registry and query
 
-kubectl apply -f general-query-service.yaml
-kubectl apply -f general-registry-service.yaml
+kubectl apply -f setup-files/general-query-service.yaml
+kubectl apply -f setup-files/general-registry-service.yaml
