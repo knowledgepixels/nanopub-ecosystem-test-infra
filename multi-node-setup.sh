@@ -1,21 +1,11 @@
 #!/bin/bash
 
-# Change the storage provisioner to support multi-node setups and dynamically wait for pods
-# Before assigning the storage class
-
-minikube addons enable volumesnapshots -p dem
-minikube addons enable csi-hostpath-driver -p dem
-minikube addons disable storage-provisioner -p dem
-minikube addons disable default-storageclass -p dem
-kubectl patch storageclass standard -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
-kubectl apply -f setup-files/storage.yaml
-
 # Add all the necessary Helm repositories
 
 helm repo add vm https://victoriametrics.github.io/helm-charts/
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add grafana https://grafana.github.io/helm-charts
-
+helm repo add chaos-mesh https://charts.chaos-mesh.org
 
 replicas=$1
 
@@ -41,11 +31,21 @@ if [ -z "$replicas" ]; then
   exit 1
 fi
 
+# Remove taints from master nodes to allow scheduling
+kubectl taint nodes $(kubectl get nodes --selector=node-role.kubernetes.io/master | awk 'FNR==2{print $1}') node-role.kubernetes.io/master-
+
 # Install the monitoring stack on the master node
 
-helm upgrade --install vms vm/victoria-metrics-single -f monitoring/vm-values.yaml --set server.nodeSelector.nodeSelectorLabel="master"
-helm upgrade --install prometheus prometheus-community/prometheus -f monitoring/prometheus-values.yaml --set kube-state-metrics.enabled="false" --set prometheus.server.nodeSelector.nodeSelectorLabel="master"
-helm upgrade --install grafana grafana/grafana -f monitoring/grafana-values.yaml --set nodeSelector.nodeSelectorLabel="master"
+helm upgrade --install vms vm/victoria-metrics-single -f monitoring/vm-values.yaml --set server.nodeSelector.nodeSelectorLabel="master" --namespace="monitoring" --create-namespace
+helm upgrade --install prometheus prometheus-community/prometheus -f monitoring/prometheus-values.yaml --set kube-state-metrics.enabled="false" --set prometheus.server.nodeSelector.nodeSelectorLabel="master" --namespace="monitoring" --create-namespace
+helm upgrade --install grafana grafana/grafana -f monitoring/grafana-values.yaml --set nodeSelector.nodeSelectorLabel="master" --namespace="monitoring" --create-namespace
+
+# Set up monitoring to be persistent
+
+pv=$(kubectl get pvc -l app.kubernetes.io/instance=prometheus --namespace=monitoring -o yaml | grep volumeName | awk '{print $2}')
+kubectl patch pv $pv -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+pv=$(kubectl get pvc -l app.kubernetes.io/instance=vms --namespace=monitoring -o yaml | grep volumeName | awk '{print $2}')
+kubectl patch pv $pv -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
 
 # loop from 1 to $replicas
 # by default schedule nanopubs only to worker nodes
@@ -54,7 +54,7 @@ helm upgrade --install grafana grafana/grafana -f monitoring/grafana-values.yaml
 
 joined=""
 for i in $(seq 1 $replicas); do
-    joined+="http://nanopub-$i-registry-application:9292"
+    joined+="http://nanopub-$i-registry-application:9292/"
     if [ $i -lt $replicas ]; then
         joined+=";"
     fi
@@ -69,7 +69,29 @@ for i in $(seq 1 $replicas); do
   helm upgrade --install nanopub-$i helm-chart --set global.nodeSelectorLabel="worker-$((i))" --set registry.application.registryPeerUrls="$joined"
 done
 
+# Change networking to ipvs and restart kube-proxy (we have to do this to enable round robin load balancing)
+kubectl get configmap kube-proxy -n kube-system -o json | \
+jq --arg newconf "$(cat <<EOF
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: ipvs
+ipvs:
+  strictARP: true
+  scheduler: rr
+EOF
+)" '.data["config.conf"] = $newconf' | \
+kubectl apply -f -
+
+echo "Restarting kube-proxy pods..."
+ kubectl delete pod -n kube-system -l k8s-app=kube-proxy
+
+
 # Apply the general services for registry and query
 
 kubectl apply -f setup-files/general-query-service.yaml
 kubectl apply -f setup-files/general-registry-service.yaml
+
+# Install Chaos Mesh for testing
+# If you do not use containerd, change the socketPath accordingly
+
+helm upgrade --install --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock --set dashboard.securityMode=false chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-mesh --set installCRDs=true --create-namespace
