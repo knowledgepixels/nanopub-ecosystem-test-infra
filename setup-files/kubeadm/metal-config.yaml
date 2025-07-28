@@ -1,0 +1,10 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: first-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  # This is the range of IP addresses that MetalLB will use for load balancing
+  # You can adjust the range according to your network setup
+  - 192.168.8.51-192.168.8.60

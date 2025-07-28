@@ -24,18 +24,18 @@ Start by installing Victoria Metrics with the options predefined by running:
 
 ```
 helm repo add vm https://victoriametrics.github.io/helm-charts/
-helm install vms vm/victoria-metrics-single -f monitoring/vm-values.yaml
+helm install vms vm/victoria-metrics-single -f monitoring/vm-values.yaml --namespace="monitoring" --create-namespace
 ```
 
 By default, VM will run as a monolith, connect to the host machine on the node port `31333` and retain the data for 1 year. All of these options can be modified through changing the appropriate fields in `metrics/vm-values.yaml` and running
 
-`helm upgrade --install vms vm/victoria-metrics-single -f metrics/vm-values.yaml`.
+`helm upgrade --install vms vm/victoria-metrics-single -f metrics/vm-values.yaml --namespace="monitoring" --create-namespace` .
 
 Then install Prometheus through:
 
 ```
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm install prometheus prometheus-community/prometheus -f monitoring/prometheus-values.yaml
+helm install prometheus prometheus-community/prometheus -f monitoring/prometheus-values.yaml --namespace="monitoring" --create-namespace --set kube-state-metrics.enabled="false"
 ```
 
 This should cause Prometheus to connect automatically to the `/metrics` endpoints exposed by the Registry and Query instances located in the same cluster, as well as to the VM instance configured before. Prometheus server will be available on the host machine on node port `31165`.
@@ -44,11 +44,10 @@ Finally, install Grafana with:
 
 ```
 helm repo add grafana https://grafana.github.io/helm-charts
-helm install grafana grafana/grafana -f monitoring/grafana-values.yaml
+helm install grafana grafana/grafana -f monitoring/grafana-values.yaml --namespace="monitoring" --create-namespace
 ```
 
 Grafana will automatically connect to the Prometheus and VM instances configured above. The dashboard will be exposed on the host machine on port `31430`. By default, authentication to the dashboard will be disabled.
-
 
 ### Multi-node setup
 
@@ -60,6 +59,22 @@ By default, the Registry instances are deployed in test mode - so that they do n
 ./multi-node-setup.sh <replica-number>
 ```
 
-### Network test setup
+The script also includes the installation and setup of a chaos emulation tool, `ChaosMesh`. The tool can be used to emulate networking problems in Kubernetes, including latency and bandwidth.
 
-The skeleton of the network test setup using ChaosMesh has been added in the `network-setup` directory.
+### Cluster setup
+
+If you want to set up a Kubernetes cluster from scratch in a way that will be compatible with the testing infrastructure, or just want to check out how to modify your current configuration, look into `setup-files/minikube` and `setup-files/kubeadm` respectively. 
+
+#### Minikube
+
+Minikube requires minimal initial setup, but can be tough to work with more advanced Kubernetes configurations. To set it up for testing purposes, run `setup-files/minikube/setup.sh`.
+
+#### Kubeadm
+
+Kubeadm requires a more complex installation at the start, but is more flexible down the line. Here, a setup with `containerd` (container runtime), `cillium` (CNI plugin), and `MetalLB` (load balancer) is described. 
+
+Please first make sure that the IPs specified in `setup-files/kubeadm/metal-config.yaml` fit into your setup - they need to belong to your LAN and be unused by other devices. Then run `setup-files/kubeadm/main-start.sh` on the main node first, follow with `setup-files/kubeadm/worker.sh` on all the worker nodes to properly configure and connect them, and then finish by running `setup-files/kubeadm/main-end.sh` on the main node. 
+
+## Backups
+
+After successfully creating your cluster, you can back up your configuration by running `./backup.sh`. The script will create a directory with the YAML descriptions of all your Kubernetes resources.
