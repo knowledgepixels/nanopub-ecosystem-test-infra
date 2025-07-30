@@ -3,7 +3,7 @@ import nanopub as np
 from random import Random
 import rdflib as rdf
 
-from distribution import ParetoDist
+from distribution import ParetoDistList
 
 
 CITO = rdf.Namespace("http://purl.org/spar/cito/")
@@ -19,12 +19,12 @@ class NanopubFaker(Faker):
         self.random = rng
         self.config = config
         # Create prefixes
-        self.prefixes = ParetoDist([
+        self.prefixes = ParetoDistList([
             self.iri_prefix()
             for _ in range(config['nanopubs']['prefix_count'])
         ], self.random)
         # Create nanopub types
-        self.nanopub_types = ParetoDist([
+        self.nanopub_types = ParetoDistList([
             self.iri_with_prefix(name_start='AboutPaper')
             for _ in range(config['nanopubs']['plain_assertion']['type_count'])
         ], self.random)
@@ -36,7 +36,7 @@ class NanopubFaker(Faker):
 
     def iri_with_prefix(self, name_start: str = '') -> rdf.URIRef:
         """Generate a rng IRI with a prefix."""
-        prefix = self.prefixes.sample()
+        prefix = self.prefixes.sample_item()
         name_end = self.word(part_of_speech='noun')
         return rdf.URIRef(f"{prefix}{name_start}{name_end.capitalize()}")
 
@@ -73,7 +73,7 @@ class NanopubFaker(Faker):
     def np_about_paper(self, conf: np.NanopubConf) -> np.Nanopub:
         """Generate a nanopub about a paper."""
         a = rdf.Graph()
-        np_type = self.nanopub_types.sample()
+        np_type = self.nanopub_types.sample_item()
         a.add((
             TEMP.assertion,
             CITO.citesAsEvidence,

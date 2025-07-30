@@ -3,7 +3,7 @@ from random import Random
 from nanopub import *
 
 from data_gen import NanopubFaker
-from distribution import ParetoDist
+from distribution import ParetoDistList
 
 NP_TYPE_PLAIN = 'plain_assertion'
 NP_TYPE_COMMENT = 'comment'
@@ -70,7 +70,7 @@ class NanopubGenerator:
             print(f"Error publishing nanopub: {e}")
 
     def publish_nanopub(self) -> None:
-        # TODO: use ParetoDist to sample the user
+        # TODO: use ParetoDistList to sample the user
         np_conf = self.rng.choice(self.np_configs)
         np_type = self.choose_nanopub_type()
         if np_type == NP_TYPE_PLAIN:
