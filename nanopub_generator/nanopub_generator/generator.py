@@ -1,0 +1,39 @@
+import random
+
+from nanopub import *
+
+from data_gen import NanopubFaker
+
+class Generator:
+    def __init__(self, config: dict, args):
+        self.dry_run = args.dry_run
+        self.config = config
+        self.fake = NanopubFaker(config)
+        # Create users
+        self.np_configs = [
+            NanopubConf(
+                use_server=args.registry_url,
+                profile=self.fake.np_profile(),
+                add_prov_generated_time=True,
+                add_pubinfo_generated_time=True,
+                attribute_publication_to_profile=True,
+                attribute_assertion_to_profile=True,
+            )
+            for _ in range(config['users']['count'])
+        ]
+
+    def publish_nanopub_safe(self) -> None:
+        try:
+            self.publish_nanopub()
+        except Exception as e:
+            print(f"Error publishing nanopub: {e}")
+
+    def publish_nanopub(self) -> None:
+        np_conf = random.choice(self.np_configs)
+        pub = self.fake.np_about_paper(np_conf)
+        if self.dry_run:
+            print(f"\n---- Dry run: Would publish nanopub: ----\n")
+            print(pub)
+        else:
+            pub.publish()
+            print(f"Published nanopub: {pub.source_uri}")

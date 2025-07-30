@@ -10,6 +10,10 @@ TEST = rdf.Namespace("https://example.org/test/ontology/np#")
 
 
 class NanopubFaker(Faker):
+    def __init__(self, config: dict):
+        super().__init__()
+        self.config = config
+
     """Custom provider to generate nanopub-related random data."""
     def orcid(self) -> str:
         """Generate a random ORCID ID."""
@@ -63,5 +67,3 @@ class NanopubFaker(Faker):
             assertion=a,
             pubinfo=p,
         )
-
-fake = NanopubFaker()
