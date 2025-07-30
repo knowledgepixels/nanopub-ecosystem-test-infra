@@ -57,6 +57,19 @@ class NanopubFaker(Faker):
             name=self.name(),
         )
 
+    def np_base(self, assertion: rdf.Graph, conf: np.NanopubConf, np_type: rdf.URIRef) -> np.Nanopub:
+        p = rdf.Graph()
+        p.add((
+            TEMP[''],
+            NPX.hasNanopubType,
+            np_type
+        ))
+        return np.Nanopub(
+            conf=conf,
+            assertion=assertion,
+            pubinfo=p,
+        )
+
     def np_about_paper(self, conf: np.NanopubConf) -> np.Nanopub:
         """Generate a nanopub about a paper."""
         a = rdf.Graph()
@@ -82,14 +95,14 @@ class NanopubFaker(Faker):
                 TEST.hasPaperColor,
                 TEST["color" + self.color_name()]
             ))
-        p = rdf.Graph()
-        p.add((
-            TEMP[''],
-            NPX.hasNanopubType,
-            np_type
+        return self.np_base(a, conf, np_type)
+
+    def np_comment(self, conf: np.NanopubConf, about_iri: str) -> np.Nanopub:
+        """Generate a nanopub commenting a different nanopub or any other IRI."""
+        a = rdf.Graph()
+        a.add((
+            rdf.URIRef(about_iri),
+            rdf.RDFS.comment,
+            rdf.Literal(self.paragraph(nb_sentences=3), lang='en')
         ))
-        return np.Nanopub(
-            conf=conf,
-            assertion=a,
-            pubinfo=p,
-        )
+        return self.np_base(a, conf, TEST.Comment)
