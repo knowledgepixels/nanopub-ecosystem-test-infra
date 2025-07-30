@@ -1,6 +1,9 @@
 from faker import Faker
 import nanopub as np
+from random import Random
 import rdflib as rdf
+
+from distribution import ParetoDist
 
 
 CITO = rdf.Namespace("http://purl.org/spar/cito/")
@@ -10,23 +13,35 @@ TEST = rdf.Namespace("https://example.org/test/ontology/np#")
 
 
 class NanopubFaker(Faker):
-    def __init__(self, config: dict):
+    """Custom provider to generate nanopub-related rng data."""
+    def __init__(self, config: dict, rng: Random):
         super().__init__()
+        self.random = rng
         self.config = config
 
-    """Custom provider to generate nanopub-related random data."""
+    def iri_prefix(self) -> str:
+        """Generate a rng IRI prefix."""
+        prefix = self.url() + self.uri_path()
+        return prefix + '/' if self.random_int(0, 1) == 0 else prefix + '#'
+
+    def iri_with_prefix(self, prefix_dist: ParetoDist, name_start: str = '') -> str:
+        """Generate a rng IRI with a prefix."""
+        prefix = prefix_dist.sample()
+        name_end = self.word(part_of_speech='noun')
+        return f"{prefix}{name_start}{name_end.capitalize()}"
+
     def orcid(self) -> str:
-        """Generate a random ORCID ID."""
+        """Generate a rng ORCID ID."""
         # note: this does not cover all possible ORCID ranges and does not care about the checksum
         return (f"0000-000{self.random_int(1, 2)}-{self.random_int(0, 9999)}-"
                 f"{self.random_int(0, 9999)}")
 
     def orcid_url(self) -> str:
-        """Generate a random ORCID URL."""
+        """Generate a rng ORCID URL."""
         return f"https://orcid.org/{self.orcid()}"
 
     def np_profile(self) -> np.Profile:
-        """Generate a random nanopub profile."""
+        """Generate a rng nanopub profile."""
         return np.Profile(
             orcid_id=self.orcid_url(),
             name=self.name(),

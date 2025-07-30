@@ -4,7 +4,7 @@ import schedule
 import time
 import yaml
 
-from generator import Generator
+from generator import NanopubGenerator
 
 parser = argparse.ArgumentParser(description="Nanopub generator")
 parser.add_argument(
@@ -58,7 +58,7 @@ def run():
             print(f"Error verifying registry URL: {e}")
             return 1
 
-    generator = Generator(config, args)
+    generator = NanopubGenerator(config, args)
     # Schedule the nanopub publishing task
     schedule.every(config['generator']['post_interval'] / 1000).seconds.do(
         generator.publish_nanopub_safe,

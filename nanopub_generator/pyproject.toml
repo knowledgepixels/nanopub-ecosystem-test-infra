@@ -7,5 +7,6 @@ dependencies = [
     "faker==37.4.0",
     "httpx==0.28.1",
     "nanopub==2.0.1",
+    "numpy>=2.3.2",
     "schedule==1.2.2",
 ]

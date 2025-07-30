@@ -1,13 +1,18 @@
 generator:
   # Interval in milliseconds between posts
   post_interval: 5000
+  # Random seed for reproducibility
+  seed: 42
 
 users:
   # Number of users to generate
   count: 10
 
 # Nanopublication template configuration
-templates:
+nanopubs:
+  # Number of prefixes/namespaces to generate, to be used in IRI generation.
+  # They will form a power-law distribution used by the generator.
+  prefix_count: 1000
   # A nanopub with a simple assertion, referring to a paper via a DOI
   plain_assertion:
     # Number of auto-generated nanopub types.
