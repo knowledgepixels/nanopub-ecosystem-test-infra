@@ -23,16 +23,6 @@ class NanopubGenerator:
             )
             for _ in range(config['users']['count'])
         ]
-        # Create prefixes
-        self.prefixes = ParetoDist([
-            self.fake.iri_prefix()
-            for _ in range(config['nanopubs']['prefix_count'])
-        ], self.rng)
-        # Create nanopub types
-        self.nanopub_types = ParetoDist([
-            self.fake.iri_with_prefix(self.prefixes, name_start='Type')
-            for _ in range(config['nanopubs']['plain_assertion']['type_count'])
-        ], self.rng)
 
     def publish_nanopub_safe(self) -> None:
         try:

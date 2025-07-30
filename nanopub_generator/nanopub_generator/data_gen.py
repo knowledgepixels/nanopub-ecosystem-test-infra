@@ -18,17 +18,27 @@ class NanopubFaker(Faker):
         super().__init__()
         self.random = rng
         self.config = config
+        # Create prefixes
+        self.prefixes = ParetoDist([
+            self.iri_prefix()
+            for _ in range(config['nanopubs']['prefix_count'])
+        ], self.random)
+        # Create nanopub types
+        self.nanopub_types = ParetoDist([
+            self.iri_with_prefix(name_start='AboutPaper')
+            for _ in range(config['nanopubs']['plain_assertion']['type_count'])
+        ], self.random)
 
     def iri_prefix(self) -> str:
         """Generate a rng IRI prefix."""
         prefix = self.url() + self.uri_path()
         return prefix + '/' if self.random_int(0, 1) == 0 else prefix + '#'
 
-    def iri_with_prefix(self, prefix_dist: ParetoDist, name_start: str = '') -> str:
+    def iri_with_prefix(self, name_start: str = '') -> rdf.URIRef:
         """Generate a rng IRI with a prefix."""
-        prefix = prefix_dist.sample()
+        prefix = self.prefixes.sample()
         name_end = self.word(part_of_speech='noun')
-        return f"{prefix}{name_start}{name_end.capitalize()}"
+        return rdf.URIRef(f"{prefix}{name_start}{name_end.capitalize()}")
 
     def orcid(self) -> str:
         """Generate a rng ORCID ID."""
@@ -50,6 +60,7 @@ class NanopubFaker(Faker):
     def np_about_paper(self, conf: np.NanopubConf) -> np.Nanopub:
         """Generate a nanopub about a paper."""
         a = rdf.Graph()
+        np_type = self.nanopub_types.sample()
         a.add((
             TEMP.assertion,
             CITO.citesAsEvidence,
@@ -63,7 +74,7 @@ class NanopubFaker(Faker):
         a.add((
             TEMP.assertion,
             rdf.RDF.type,
-            TEST.PaperAssertion
+            np_type
         ))
         for i in range(self.random_int(1, 3)):
             a.add((
@@ -75,7 +86,7 @@ class NanopubFaker(Faker):
         p.add((
             TEMP[''],
             NPX.hasNanopubType,
-            TEST.PaperAssertion
+            np_type
         ))
         return np.Nanopub(
             conf=conf,
