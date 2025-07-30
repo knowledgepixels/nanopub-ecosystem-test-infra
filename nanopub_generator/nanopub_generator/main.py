@@ -26,19 +26,28 @@ parser.add_argument(
     help="Interval in milliseconds between posts (default: 5000)",
     default=5000,
 )
+parser.add_argument(
+    "--dry-run",
+    action='store_true',
+    help="If set, do not actually publish nanopubs, just print what would be published",
+)
 
-def publish_nanopub_safe(np_configs: List[NanopubConf]) -> None:
+def publish_nanopub_safe(np_configs: List[NanopubConf], dry_run: bool) -> None:
     try:
-        publish_nanopub(np_configs)
+        publish_nanopub(np_configs, dry_run)
     except Exception as e:
         print(f"Error publishing nanopub: {e}")
 
 
-def publish_nanopub(np_configs: List[NanopubConf]) -> None:
+def publish_nanopub(np_configs: List[NanopubConf], dry_run: bool) -> None:
     np_conf = random.choice(np_configs)
     pub = fake.np_about_paper(np_conf)
-    pub.publish()
-    print(f"Published nanopub: {pub.source_uri}")
+    if dry_run:
+        print(f"\n---- Dry run: Would publish nanopub: ----\n")
+        print(pub)
+    else:
+        pub.publish()
+        print(f"Published nanopub: {pub.source_uri}")
 
 
 def verify_test_instance(url: str) -> None:
@@ -52,12 +61,13 @@ def verify_test_instance(url: str) -> None:
 
 def run():
     args = parser.parse_args()
-    # Verify the registry URL
-    try:
-        verify_test_instance(args.registry_url)
-    except Exception as e:
-        print(f"Error verifying registry URL: {e}")
-        return 1
+    if not args.dry_run:
+        # Verify the registry URL
+        try:
+            verify_test_instance(args.registry_url)
+        except Exception as e:
+            print(f"Error verifying registry URL: {e}")
+            return 1
     # Create users
     np_configs = [
         NanopubConf(
@@ -71,7 +81,11 @@ def run():
         for _ in range(args.user_count)
     ]
     # Schedule the nanopub publishing task
-    schedule.every(args.post_interval / 1000).seconds.do(publish_nanopub_safe, np_configs=np_configs)
+    schedule.every(args.post_interval / 1000).seconds.do(
+        publish_nanopub_safe,
+        np_configs=np_configs,
+        dry_run=args.dry_run,
+    )
 
     print("Nanopub generator started. Press Ctrl+C to stop.")
     while True:
