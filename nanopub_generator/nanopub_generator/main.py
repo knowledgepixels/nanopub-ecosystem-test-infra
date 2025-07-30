@@ -4,6 +4,7 @@ import random
 import schedule
 import time
 from typing import List
+import yaml
 
 from nanopub import *
 from data_gen import fake
@@ -15,31 +16,25 @@ parser.add_argument(
     required=True,
 )
 parser.add_argument(
-    "--user-count",
-    type=int,
-    help="Number of users to generate (default: 10)",
-    default=10,
-)
-parser.add_argument(
-    "--post-interval",
-    type=int,
-    help="Interval in milliseconds between posts (default: 5000)",
-    default=5000,
-)
-parser.add_argument(
     "--dry-run",
     action='store_true',
     help="If set, do not actually publish nanopubs, just print what would be published",
 )
+parser.add_argument(
+    "--config-file",
+    type=str,
+    help="Path to a configuration file (config.yaml) for the generator. Default: ./config.yaml",
+    default="./config.yaml",
+)
 
-def publish_nanopub_safe(np_configs: List[NanopubConf], dry_run: bool) -> None:
+def publish_nanopub_safe(np_configs: List[NanopubConf], config: dict, dry_run: bool) -> None:
     try:
-        publish_nanopub(np_configs, dry_run)
+        publish_nanopub(np_configs, config, dry_run)
     except Exception as e:
         print(f"Error publishing nanopub: {e}")
 
 
-def publish_nanopub(np_configs: List[NanopubConf], dry_run: bool) -> None:
+def publish_nanopub(np_configs: List[NanopubConf], config: dict, dry_run: bool) -> None:
     np_conf = random.choice(np_configs)
     pub = fake.np_about_paper(np_conf)
     if dry_run:
@@ -61,6 +56,21 @@ def verify_test_instance(url: str) -> None:
 
 def run():
     args = parser.parse_args()
+    try:
+        with open(args.config_file, 'rt') as f:
+            config = yaml.safe_load(f)
+    except FileNotFoundError as e:
+        print(f"Configuration file not found: {e}")
+        return 1
+    except yaml.YAMLError as e:
+        print(f"Error parsing configuration file: {e}")
+        return 1
+    except Exception as e:
+        print(f"Unexpected error reading configuration file: {e}")
+        return 1
+
+    print(f"Using configuration from {args.config_file}")
+
     if not args.dry_run:
         # Verify the registry URL
         try:
@@ -78,12 +88,13 @@ def run():
             attribute_publication_to_profile=True,
             attribute_assertion_to_profile=True,
         )
-        for _ in range(args.user_count)
+        for _ in range(config['users']['count'])
     ]
     # Schedule the nanopub publishing task
-    schedule.every(args.post_interval / 1000).seconds.do(
+    schedule.every(config['generator']['post_interval'] / 1000).seconds.do(
         publish_nanopub_safe,
         np_configs=np_configs,
+        config=config,
         dry_run=args.dry_run,
     )
 

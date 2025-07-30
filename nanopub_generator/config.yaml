@@ -1,0 +1,15 @@
+generator:
+  # Interval in milliseconds between posts
+  post_interval: 5000
+
+users:
+  # Number of users to generate
+  count: 10
+
+# Nanopublication template configuration
+templates:
+  # A nanopub with a simple assertion, referring to a paper via a DOI
+  plain_assertion:
+    # Number of auto-generated nanopub types.
+    # They will form a power-law distribution used by the generator.
+    type_count: 100
