@@ -70,7 +70,7 @@ class NanopubFaker(Faker):
                 f"{self.random_int(0, 9999)}")
 
     def orcid_url(self) -> str:
-        """Generate a rng ORCID URL."""
+        """Generate an rng ORCID URL."""
         return f"https://orcid.org/{self.orcid()}"
 
     def np_profile(self) -> np.Profile:
