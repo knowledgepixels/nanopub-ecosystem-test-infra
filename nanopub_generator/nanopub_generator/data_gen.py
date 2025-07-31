@@ -181,13 +181,13 @@ class NanopubFaker(Faker):
 
     def np_update(self, conf: np.NanopubConf, supersede: np.Nanopub) -> np.Nanopub:
         """Generate a nanopub updating a different nanopub or any other IRI."""
-        a = rdf.Graph()
         if self.random.random() < self.config['nanopubs']['update_assertion']['reuse_type_probability']:
             # Reuse the type of the original nanopub
             np_type = list(supersede.pubinfo.subject_objects(NPX.hasNanopubType))[0][1]
         else:
             # Use a random type
             np_type = self.nanopub_types.sample_item()
+        a = self.np_plain_assertion(np_type)
         pub = self.np_base(a, conf, np_type)
         pub.pubinfo.add((
             TEMP[''],

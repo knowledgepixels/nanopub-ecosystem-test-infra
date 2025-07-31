@@ -1,6 +1,6 @@
 generator:
   # Interval in milliseconds between posts
-  post_interval: 2000
+  post_interval: 1
   # Random seed for reproducibility
   seed: 42
 
@@ -20,7 +20,7 @@ nanopubs:
     weight: 0.6
     # Number of nanopubs IRIs to keep in cache, for potential commenting on / updating.
     # Old nanopubs will be removed in random order from the cache.
-    recent_count: 20
+    recent_count: 200
     # Number of auto-generated nanopub types.
     # They will form a power-law distribution used by the generator.
     type_count: 100
@@ -38,10 +38,13 @@ nanopubs:
     weight: 0.3
     # Number of nanopubs IRIs to keep in cache, for potential commenting on / updating.
     # Old nanopubs will be removed in random order from the cache.
-    recent_count: 10
+    recent_count: 100
 
   update_assertion:
     # Weight of the nanopub type in the distribution. The weights are relative and don't need to sum to 1.
     weight: 0.05
     # Probability of using the same type as the original nanopub.
     reuse_type_probability: 0.95
+    # Number of nanopubs IRIs to keep in cache, for potential commenting on / updating.
+    # Old nanopubs will be removed in random order from the cache.
+    recent_count: 100
