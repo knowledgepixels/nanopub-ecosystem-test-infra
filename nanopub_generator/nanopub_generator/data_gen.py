@@ -116,8 +116,12 @@ class NanopubFaker(Faker):
 
     def np_about_paper(self, conf: np.NanopubConf) -> np.Nanopub:
         """Generate a nanopub about a paper."""
-        a = rdf.Graph()
         np_type = self.nanopub_types.sample_item()
+        a = self.np_plain_assertion(np_type)
+        return self.np_base(a, conf, np_type)
+
+    def np_plain_assertion(self, np_type: rdf.URIRef) -> rdf.Graph:
+        a = rdf.Graph()
         a.add((
             TEMP.assertion,
             CITO.citesAsEvidence,
@@ -163,7 +167,7 @@ class NanopubFaker(Faker):
                 TEST.relatedTo,
                 b_node
             ))
-        return self.np_base(a, conf, np_type)
+        return a
 
     def np_comment(self, conf: np.NanopubConf, about_iri: str) -> np.Nanopub:
         """Generate a nanopub commenting a different nanopub or any other IRI."""
@@ -174,3 +178,20 @@ class NanopubFaker(Faker):
             rdf.Literal(self.paragraph(nb_sentences=3), lang='en')
         ))
         return self.np_base(a, conf, TEST.Comment)
+
+    def np_update(self, conf: np.NanopubConf, supersede: np.Nanopub) -> np.Nanopub:
+        """Generate a nanopub updating a different nanopub or any other IRI."""
+        a = rdf.Graph()
+        if self.random.random() < self.config['nanopubs']['update_assertion']['reuse_type_probability']:
+            # Reuse the type of the original nanopub
+            np_type = list(supersede.pubinfo.subject_objects(NPX.hasNanopubType))[0][1]
+        else:
+            # Use a random type
+            np_type = self.nanopub_types.sample_item()
+        pub = self.np_base(a, conf, np_type)
+        pub.pubinfo.add((
+            TEMP[''],
+            NPX.supersedes,
+            rdf.URIRef(supersede.source_uri)
+        ))
+        return pub
