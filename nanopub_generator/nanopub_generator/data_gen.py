@@ -3,7 +3,7 @@ import nanopub as np
 from random import Random
 import rdflib as rdf
 
-from distribution import ParetoDistList
+from distribution import ParetoDistList, ParetoDist
 
 
 CITO = rdf.Namespace("http://purl.org/spar/cito/")
@@ -28,6 +28,8 @@ class NanopubFaker(Faker):
             self.iri_with_prefix(name_start='AboutPaper')
             for _ in range(config['nanopubs']['plain_assertion']['type_count'])
         ], self.random)
+        # Helper distribution
+        self.dist_0_20 = ParetoDist(self.random, 0, 20)
 
     def iri_prefix(self) -> str:
         """Generate a rng IRI prefix."""
@@ -70,6 +72,27 @@ class NanopubFaker(Faker):
             pubinfo=p,
         )
 
+    def add_blank_node(self, g: rdf.Graph) -> rdf.BNode:
+        """Add a blank node with some extra information to the graph."""
+        bnode = rdf.BNode()
+        g.add((
+            bnode,
+            rdf.RDF.type,
+            rdf.RDFS.Resource
+        ))
+        g.add((
+            bnode,
+            rdf.RDFS.label,
+            rdf.Literal(self.word(part_of_speech='noun'), lang='en')
+        ))
+        for i in range(self.dist_0_20.sample()):
+            g.add((
+                bnode,
+                TEST.relatedTo,
+                self.iri_with_prefix(name_start='item')
+            ))
+        return bnode
+
     def np_about_paper(self, conf: np.NanopubConf) -> np.Nanopub:
         """Generate a nanopub about a paper."""
         a = rdf.Graph()
@@ -94,6 +117,13 @@ class NanopubFaker(Faker):
                 TEMP.assertion,
                 TEST.hasPaperColor,
                 TEST["color" + self.color_name()]
+            ))
+        for i in range(self.dist_0_20.sample()):
+            b_node = self.add_blank_node(a)
+            a.add((
+                TEMP.assertion,
+                TEST.relatedTo,
+                b_node
             ))
         return self.np_base(a, conf, np_type)
 

@@ -9,8 +9,7 @@ from generator import NanopubGenerator
 parser = argparse.ArgumentParser(description="Nanopub generator")
 parser.add_argument(
     "--registry-url",
-    help="URL of the Registry endpoint for publishing nanopubs",
-    required=True,
+    help="URL of the Registry endpoint for publishing nanopubs. Required if not in dry-run mode.",
 )
 parser.add_argument(
     "--dry-run",
@@ -52,6 +51,9 @@ def run():
 
     if not args.dry_run:
         # Verify the registry URL
+        if not args.registry_url:
+            print("Error: --registry-url is required when not in dry-run mode.")
+            return 1
         try:
             verify_test_instance(args.registry_url)
         except Exception as e:
