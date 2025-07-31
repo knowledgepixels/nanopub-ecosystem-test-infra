@@ -64,7 +64,7 @@ class NanopubFaker(Faker):
         return self.iri_with_prefix('uncommon')
 
     def orcid(self) -> str:
-        """Generate a rng ORCID ID."""
+        """Generate an rng ORCID ID."""
         # note: this does not cover all possible ORCID ranges and does not care about the checksum
         return (f"0000-000{self.random_int(1, 2)}-{self.random_int(0, 9999)}-"
                 f"{self.random_int(0, 9999)}")
