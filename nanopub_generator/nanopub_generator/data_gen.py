@@ -102,11 +102,28 @@ class NanopubFaker(Faker):
             CITO.citesAsEvidence,
             rdf.URIRef(f"https://doi.org/{self.doi()}")
         ))
-        a.add((
-            TEMP.assertion,
-            rdf.RDFS.comment,
-            rdf.Literal(self.paragraph(nb_sentences=3), lang='en')
-        ))
+        match self.random_int(1, 3):
+            case 1:
+                # Langstring literal
+                a.add((
+                    TEMP.assertion,
+                    rdf.RDFS.comment,
+                    rdf.Literal(self.paragraph(nb_sentences=self.dist_0_20.sample() + 1), lang='en')
+                ))
+            case 2:
+                # Integer literal
+                a.add((
+                    TEMP.assertion,
+                    TEST.hasReviewScore,
+                    rdf.Literal(self.random_int(1, 1000), datatype=rdf.XSD.integer)
+                ))
+            case 3:
+                # Boolean literal
+                a.add((
+                    TEMP.assertion,
+                    TEST.likesPaper,
+                    rdf.Literal(self.random.choice(['true', 'false']), datatype=rdf.XSD.boolean)
+                ))
         a.add((
             TEMP.assertion,
             rdf.RDF.type,
