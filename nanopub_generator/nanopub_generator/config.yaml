@@ -1,6 +1,6 @@
 generator:
   # Interval in milliseconds between posts
-  post_interval: 1
+  post_interval: 2000
   # Random seed for reproducibility
   seed: 42
 
