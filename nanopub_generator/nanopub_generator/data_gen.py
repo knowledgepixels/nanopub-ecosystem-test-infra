@@ -74,7 +74,7 @@ class NanopubFaker(Faker):
         return f"https://orcid.org/{self.orcid()}"
 
     def np_profile(self) -> np.Profile:
-        """Generate a rng nanopub profile."""
+        """Generate an rng nanopub profile."""
         return np.Profile(
             orcid_id=self.orcid_url(),
             name=self.name(),
