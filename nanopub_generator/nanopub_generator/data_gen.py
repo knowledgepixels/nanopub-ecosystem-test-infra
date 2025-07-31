@@ -4,7 +4,7 @@ from random import Random
 import rdflib as rdf
 
 from distribution import ParetoDistList, ParetoDist
-
+from recent_nanopubs import RecentNanopubs
 
 CITO = rdf.Namespace("http://purl.org/spar/cito/")
 TEMP = rdf.Namespace("http://purl.org/nanopub/temp/np#")
@@ -14,20 +14,28 @@ TEST = rdf.Namespace("https://example.org/test/ontology/np#")
 
 class NanopubFaker(Faker):
     """Custom provider to generate nanopub-related rng data."""
-    def __init__(self, config: dict, rng: Random):
+    def __init__(self, config: dict, rng: Random, recent_nps: RecentNanopubs):
         super().__init__()
         self.random = rng
         self.config = config
+        self.recent_nps = recent_nps
         # Create prefixes
         self.prefixes = ParetoDistList([
             self.iri_prefix()
-            for _ in range(config['nanopubs']['prefix_count'])
+            for _ in range(self.config['nanopubs']['prefix_count'])
         ], self.random)
         # Create nanopub types
         self.nanopub_types = ParetoDistList([
             self.iri_with_prefix(name_start='AboutPaper')
-            for _ in range(config['nanopubs']['plain_assertion']['type_count'])
+            for _ in range(self.config['nanopubs']['plain_assertion']['type_count'])
         ], self.random)
+        # Common IRIs
+        self.common_iris = ParetoDistList([
+            self.iri_with_prefix(name_start='common')
+            for _ in range(self.config['nanopubs']['plain_assertion']['iris']['common_count'])
+        ], self.random)
+        self.common_iri_probability = self.config['nanopubs']['plain_assertion']['iris']['common_probability']
+        self.recent_nanopub_iri_probability = self.config['nanopubs']['plain_assertion']['iris']['recent_nanopub_probability']
         # Helper distribution
         self.dist_0_20 = ParetoDist(self.random, 0, 20)
 
@@ -41,6 +49,19 @@ class NanopubFaker(Faker):
         prefix = self.prefixes.sample_item()
         name_end = self.word(part_of_speech='noun')
         return rdf.URIRef(f"{prefix}{name_start}{name_end.capitalize()}")
+
+    def iri_with_commonality(self) -> rdf.URIRef:
+        """Generate a rng IRI that may be common or recent."""
+        r = self.random.random()
+        if r < self.common_iri_probability:
+            # Use a common IRI
+            return self.common_iris.sample_item()
+        elif r < self.common_iri_probability + self.recent_nanopub_iri_probability:
+            # Use a recent nanopub IRI
+            recent_np = self.recent_nps.get_recent_nanopub()
+            if recent_np is not None:
+                return rdf.URIRef(recent_np.source_uri)
+        return self.iri_with_prefix('uncommon')
 
     def orcid(self) -> str:
         """Generate a rng ORCID ID."""
@@ -89,7 +110,7 @@ class NanopubFaker(Faker):
             g.add((
                 bnode,
                 TEST.relatedTo,
-                self.iri_with_prefix(name_start='item')
+                self.iri_with_commonality()
             ))
         return bnode
 

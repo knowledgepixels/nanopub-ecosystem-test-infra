@@ -2,24 +2,18 @@ from random import Random
 
 from nanopub import *
 
+from constants import *
 from data_gen import NanopubFaker
-from distribution import ParetoDistList
+from recent_nanopubs import RecentNanopubs
 
-NP_TYPE_PLAIN = 'plain_assertion'
-NP_TYPE_COMMENT = 'comment'
-
-NP_TYPES = [
-    NP_TYPE_PLAIN,
-    NP_TYPE_COMMENT,
-]
 
 class NanopubGenerator:
     def __init__(self, config: dict, args):
         self.dry_run = args.dry_run
         self.config = config
         self.rng = Random(config['generator']['seed'])
-        self.fake = NanopubFaker(config, self.rng)
-        self.recent_nanopubs = {k: [] for k in NP_TYPES}
+        self.recent_nps = RecentNanopubs(config, self.rng)
+        self.fake = NanopubFaker(config, self.rng, self.recent_nps)
         # Create users
         self.np_configs = [
             NanopubConf(
@@ -32,25 +26,6 @@ class NanopubGenerator:
             )
             for _ in range(config['users']['count'])
         ]
-
-    def update_recent_nanopubs(self, nanopub: Nanopub, np_type: str) -> None:
-        """Update the list of recent nanopubs."""
-        np_list = self.recent_nanopubs[np_type]
-        np_list.append(nanopub)
-        if len(np_list) > self.config['nanopubs'][np_type]['recent_count']:
-            np_list.pop(self.rng.randint(0, len(np_list)))
-
-    def get_recent_nanopub(self, np_type: str = None) -> Nanopub | None:
-        """Get a recent nanopub of the specified type or None if there are no recent nanopubs."""
-        if np_type is None:
-            lists = list(self.recent_nanopubs.values())
-            self.rng.shuffle(lists)
-        else:
-            lists = [self.recent_nanopubs[np_type]]
-        for np_list in lists:
-            if len(np_list) > 0:
-                return self.rng.choice(np_list)
-        return None
 
     def choose_nanopub_type(self) -> str:
         """Choose a nanopub type based on the configured weights."""
@@ -76,7 +51,7 @@ class NanopubGenerator:
         if np_type == NP_TYPE_PLAIN:
             pub = self.fake.np_about_paper(np_conf)
         elif np_type == NP_TYPE_COMMENT:
-            recent_pub = self.get_recent_nanopub()
+            recent_pub = self.recent_nps.get_recent_nanopub()
             if recent_pub is None:
                 print("No recent nanopub to comment on.")
                 return
@@ -85,7 +60,7 @@ class NanopubGenerator:
             raise NotImplementedError(f"Unsupported nanopub type: {np_type}")
 
         pub.sign()
-        self.update_recent_nanopubs(pub, NP_TYPE_PLAIN)
+        self.recent_nps.update_recent_nanopubs(pub, NP_TYPE_PLAIN)
         if self.dry_run:
             print(f"\n---- Dry run: Would publish nanopub: ----\n")
             print(pub)

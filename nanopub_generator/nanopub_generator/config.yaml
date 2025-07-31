@@ -24,6 +24,14 @@ nanopubs:
     # Number of auto-generated nanopub types.
     # They will form a power-law distribution used by the generator.
     type_count: 100
+    # Parameters for IRI generation.
+    iris:
+      # How many common IRIs to use throughout the entire generation process.
+      common_count: 1000
+      # Probability of using a common IRI for a nanopub.
+      common_probability: 0.4
+      # Probability of using an IRI of a recently generated nanopub.
+      recent_nanopub_probability: 0.3
 
   comment:
     # Weight of the nanopub type in the distribution. The weights are relative and don't need to sum to 1.
