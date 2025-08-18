@@ -4,9 +4,30 @@ generator:
   # Random seed for reproducibility
   seed: 42
 
-users:
-  # Number of users to generate
-  count: 10
+  users:
+    # Number of users to generate
+    count: 10
+
+query:
+  # Random sample for sampling reproducibility
+  # Each user uses seed + user_num as an individual seed
+  seed: 42
+
+  # Timeout in seconds for query
+  timeout: 10
+
+  logging:
+    log_path: "./logs"
+
+  users:
+    # Number of users making requests in parallel
+    count: 10
+
+  # Probability of choosing a custom endpoint
+  probabilities_endpoints:
+    full: 0.1
+    last30d: 0.1
+
 
 # Nanopublication template configuration
 nanopubs:
