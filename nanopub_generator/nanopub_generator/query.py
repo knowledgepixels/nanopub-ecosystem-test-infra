@@ -3,7 +3,7 @@ from typing import List
 import requests
 import re
 import csv
-import random
+from random import Random
 
 
 def fetch(url: str, endpoint: str) -> List[str]:
@@ -31,42 +31,25 @@ class QueryUser:
         query: dict,
     ) -> None:
         self.user_id = user_id
-        random.seed(query["seed"] + user_id)  # Every user gets a separate seed
+        # Every user gets a separate seed
+        self.rng = Random(query["seed"] + user_id)
         self.pubkeys = pubkeys
         self.path_to_logs = query["logging"]["log_path"]
         self.custom_endpoints = custom_endpoints
         self.timeout = query["timeout"]
-        # 0 - count nanopubs for this repo
-        # 1 - count statemements in all nanopubs for this repo
-        # TODO: factor this out to config
-        self.queries = [
-            """prefix npa: <http://purl.org/nanopub/admin/>
-                        select * where {
-                            npa:thisRepo npa:hasNanopubCount ?count .
-                        }""",
-            """prefix np: <http://www.nanopub.org/nschema#>
-
-                    select (count(*) as ?count) where {
-                    ?nanopub a np:Nanopublication ;
-                            np:hasAssertion ?assertion .
-                    graph ?assertion {
-                        ?subject ?predicate ?object .
-                    }
-                    }
-            """,
-        ]
+        self.queries = [q["query"] for q in query["queries"]]
+        self.query_ids = list(range(len(self.queries)))  # List of query IDs
+        self.query_weights = [q["weight"] for q in query["queries"]]
 
     def _select_query(self) -> int:
-        # TODO: implement query mix probabilities
-        probs_q1 = 0.5  # Select a random query with equal probs
-        rand = random.random()
-        if rand < probs_q1:
-            return 0
-        else:
-            return 1
+        return self.rng.choices(
+            population=self.query_ids,
+            weights=self.query_weights,
+            k=1,
+        )[0]
 
     def _select_endpoint(self) -> str:
-        rand = random.random()
+        rand = self.rng.random()
         cumulative = 0.0
 
         for (
@@ -77,7 +60,7 @@ class QueryUser:
             if rand < cumulative:
                 return endpoint
 
-        return random.choice(self.pubkeys)
+        return self.rng.choice(self.pubkeys)
 
     def start_querying(self):
         with open(
@@ -99,9 +82,29 @@ class QueryUser:
                         "request_end_timestamp",
                     ]
                 )
+
+            BUFFER_SIZE = 20  # Buffer size for statistics
+            row_buffer = []  # last 20 rows for statistics
+            total_queries = 0
             while True:
                 endpoint = self._select_endpoint()
                 row = self._run_sparql_query(endpoint, self._select_query())
+                row_buffer.append(row)
+                total_queries += 1
+                if len(row_buffer) >= BUFFER_SIZE:
+                    query_times = [
+                        r[4] for r in row_buffer
+                        if r[1] == "ok"
+                    ]
+                    query_time = (sum(query_times) / 1e3) / len(query_times) if query_times else 0
+                    row_buffer.clear()
+                    print(
+                        f"User {self.user_id:02}: "
+                        f"Status: {row[1]}, "
+                        f"Total queries: {total_queries}, "
+                        f"Successful queries: {len(query_times)} / {BUFFER_SIZE}, "
+                        f"Avg query time: {query_time:.2f} ms"
+                    )
                 writer.writerow(
                     row
                 )  # Buffering is set to 1, so no manual flushing needed
@@ -109,14 +112,19 @@ class QueryUser:
     def _run_sparql_query(self, endpoint_url, query_id):
         params = {"query": self.queries[query_id]}
         start_timestamp = time.time()
-        response = requests.get(endpoint_url, params=params, timeout=self.timeout)
-        end_timestamp = time.time()
+        try:
+            response = requests.get(endpoint_url, params=params, timeout=self.timeout)
+            end_timestamp = time.time()
+        except requests.exceptions.ReadTimeout as e:
+            end_timestamp = time.time()
+            print(f"User {self.user_id:02}: Read timeout for query {query_id} on endpoint {endpoint_url}")
+            return (query_id, "client_timeout", 0, "0", 0, start_timestamp, end_timestamp)
         return (
             query_id,
             "ok"
             if 200 <= response.status_code < 300
             else (
-                "timeout" if response.status_code in [408, 504] else "failed"
+                "server_timeout" if response.status_code in [408, 504] else "failed"
             ),  # 408 - request timeout, 504 - gateway timeout
             response.text.count("\n")
             - 1,  # Count number of rows returned from the query by counting caret returns - 1 (header)

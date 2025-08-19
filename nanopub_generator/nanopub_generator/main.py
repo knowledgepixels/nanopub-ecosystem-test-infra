@@ -1,8 +1,11 @@
 import argparse
+import os
+from argparse import Namespace
 from concurrent.futures import ProcessPoolExecutor
 import httpx
 import schedule
 import time
+import traceback
 import yaml
 
 from generator import NanopubGenerator
@@ -31,8 +34,7 @@ parser.add_argument(
 parser.add_argument(
     "--mode",
     type=str,
-    help="Mode for generator pipeline. Possbile values: registry, query. Default: query",
-    default="query",
+    help="Mode for generator pipeline. Possible values: registry, query. Required.",
 )
 
 
@@ -69,64 +71,80 @@ def run():
     print(f"Using configuration from {args.config_file}")
 
     if args.mode == "registry":
-        if not args.dry_run:
-            # Verify the registry URL
-            if not args.registry_url:
-                print("Error: --registry-url is required when not in dry-run mode.")
-                return 1
-            try:
-                verify_test_instance(args.registry_url)
-            except Exception as e:
-                print(f"Error verifying registry URL: {e}")
-                return 1
-
-        generator = NanopubGenerator(config, args)
-        # Schedule the nanopub publishing task
-        schedule.every(config["generator"]["post_interval"] / 1000).seconds.do(
-            generator.publish_nanopub_safe,
-        )
-
-        print("Nanopub generator started. Press Ctrl+C to stop.")
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
+        run_registry(args, config)
+        return 0
 
     if args.mode == "query":
-        if not args.query_url:
-            print("Error: --query-url is required when query mode is used.")
-            return 1
-        # Fetch pubkeys
-        pubkeys = fetch(args.query_url, "pubkey")
-        # Transform pubkeys to endpoints
-        pubkeys = [f"{args.query_url}/repo/pubkey/{pubkey}" for pubkey in pubkeys]
-        custom_endpoints = {}  # Add additional endpoints along with probability of querying each
-        for query, prob in config["query"]["probabilities_endpoints"].items():
-            custom_endpoints.update({f"{args.query_url}/repo/{query}": prob})
-        with ProcessPoolExecutor(  # Assign and run a separate process per each user
-            max_workers=config["query"]["users"]["count"]
-        ) as executor:
-            futures = [
-                executor.submit(
-                    run_query_user,
-                    i,
-                    pubkeys,
-                    custom_endpoints,
-                    config["query"],
-                )
-                for i in range(config["query"]["users"]["count"])
-            ]
-            print("Querying started. Press Ctrl+C to stop.")
+        run_query(args, config)
+        return 0
 
-            try:
-                for future in futures:
-                    future.result()  # Catch any exceptions from processes
-            except KeyboardInterrupt:
-                print("\nReceived Ctrl+C, shutting down...")
-            except Exception as e:
-                print(f"Process crashed: {e}")
-            finally:
-                print("\nCleaning up resources...")
-                executor.shutdown(wait=False)
+    print(f"Error: Invalid mode '{args.mode}'. Use 'registry' or 'query'.")
+    return 1
+
+
+def run_registry(args: Namespace, config: dict):
+    if not args.dry_run:
+        # Verify the registry URL
+        if not args.registry_url:
+            print("Error: --registry-url is required when not in dry-run mode.")
+            return 1
+        try:
+            verify_test_instance(args.registry_url)
+        except Exception as e:
+            print(f"Error verifying registry URL: {e}")
+            return 1
+
+    generator = NanopubGenerator(config, args)
+    # Schedule the nanopub publishing task
+    schedule.every(config["generator"]["post_interval"] / 1000).seconds.do(
+        generator.publish_nanopub_safe,
+    )
+
+    print("Nanopub generator started. Press Ctrl+C to stop.")
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+def run_query(args: Namespace, config: dict):
+    if not args.query_url:
+        print("Error: --query-url is required when query mode is used.")
+        return 1
+    log_path = config["query"]["logging"]["log_path"]
+    os.makedirs(log_path, exist_ok=True)  # Ensure the log directory exists
+    # Fetch pubkeys
+    pubkeys = fetch(args.query_url, "pubkey")
+    # Transform pubkeys to endpoints
+    pubkeys = [f"{args.query_url}/repo/pubkey/{pubkey}" for pubkey in pubkeys]
+    custom_endpoints = {}  # Add additional endpoints along with probability of querying each
+    for query, prob in config["query"]["probabilities_endpoints"].items():
+        custom_endpoints.update({f"{args.query_url}/repo/{query}": prob})
+    with ProcessPoolExecutor(  # Assign and run a separate process per each user
+            max_workers=config["query"]["users"]["count"]
+    ) as executor:
+        futures = [
+            executor.submit(
+                run_query_user,
+                i,
+                pubkeys,
+                custom_endpoints,
+                config["query"],
+            )
+            for i in range(config["query"]["users"]["count"])
+        ]
+        print("Querying started. Press Ctrl+C to stop.")
+
+        try:
+            for future in futures:
+                future.result()  # Catch any exceptions from processes
+        except KeyboardInterrupt:
+            print("\nReceived Ctrl+C, shutting down...")
+        except Exception as e:
+            print(f"Process crashed: {e}")
+            print(traceback.format_exc())
+        finally:
+            print("\nCleaning up resources...")
+            executor.shutdown(wait=False)
+            return None
 
 
 if __name__ == "__main__":

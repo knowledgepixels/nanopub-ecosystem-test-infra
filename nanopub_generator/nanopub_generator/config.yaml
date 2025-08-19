@@ -23,10 +23,30 @@ query:
     # Number of users making requests in parallel
     count: 10
 
-  # Probability of choosing a custom endpoint
+  # Probability of choosing a specific repository for a query
+  # Otherwise, a random pubkey or type repository is chosen
   probabilities_endpoints:
     full: 0.1
     last30d: 0.1
+
+  # Queries to run against the repository
+  # The weights are relative and determine query frequency in the query mix.
+  queries:
+    # Get nanopub count for a specific repository
+    - weight: 3
+      query: |
+        prefix npa: <http://purl.org/nanopub/admin/>
+        select * where {
+          npa:thisRepo npa:hasNanopubCount ?count .
+        }
+
+    # Count all triples in the repository
+    - weight: 1
+      query: |
+        prefix np: <http://www.nanopub.org/nschema#>
+        select (count(*) as ?count) where {
+          ?subject ?predicate ?object .
+        }
 
 
 # Nanopublication template configuration
