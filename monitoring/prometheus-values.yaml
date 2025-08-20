@@ -1,4 +1,8 @@
+
 server:
+  global:
+    scrape_interval: 1s
+    scrape_timeout: 1s
   service:
     type: NodePort
     nodePort: "31165"
@@ -9,7 +13,7 @@ server:
 
 extraScrapeConfigs: |
   - job_name: 'registry-pods'
-    scrape_interval: 30s
+    scrape_interval: 1s
     kubernetes_sd_configs:
       - role: pod
         namespaces:
@@ -36,7 +40,7 @@ extraScrapeConfigs: |
         replacement: $1:9293
 
   - job_name: 'query-pods'
-    scrape_interval: 30s
+    scrape_interval: 1s
     kubernetes_sd_configs:
       - role: pod
         namespaces:
@@ -61,3 +65,18 @@ extraScrapeConfigs: |
         regex: (.+):\d+
         target_label: __address__
         replacement: $1:9394
+
+  - job_name: 'kubelet-resource'
+    scheme: https
+    kubernetes_sd_configs:
+      - role: node
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    relabel_configs:
+      # Point at the apiserver and set per-node metrics path
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics/resource
