@@ -119,6 +119,8 @@ class QueryUser:
             end_timestamp = time.time()
             print(f"User {self.user_id:02}: Read timeout for query {query_id} on endpoint {endpoint_url}")
             return (query_id, "client_timeout", 0, "0", 0, start_timestamp, end_timestamp)
+        rows = response.text.split("\r\n")
+        value_returned = rows[1] if len(rows) > 1 else ""
         return (
             query_id,
             "ok"
@@ -128,7 +130,7 @@ class QueryUser:
             ),  # 408 - request timeout, 504 - gateway timeout
             response.text.count("\n")
             - 1,  # Count number of rows returned from the query by counting caret returns - 1 (header)
-            response.text.split("\r\n")[1],  # Actual count returned by the sparql
+            value_returned,  # Actual count returned by the sparql
             response.elapsed.microseconds,
             start_timestamp,
             end_timestamp,
