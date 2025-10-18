@@ -89,3 +89,8 @@ nanopubs:
     # Number of nanopubs IRIs to keep in cache, for potential commenting on / updating.
     # Old nanopubs will be removed in random order from the cache.
     recent_count: 100
+
+  retract:
+    # Weight of the nanopub type in the distribution. The weights are relative and don't need to sum to 1.
+    weight: 0.05
+    recent_count: 100
