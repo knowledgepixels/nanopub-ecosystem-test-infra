@@ -73,11 +73,11 @@ class NanopubFaker(Faker):
         """Generate an rng ORCID URL."""
         return f"https://orcid.org/{self.orcid()}"
 
-    def np_profile(self) -> np.Profile:
+    def np_profile(self, orcid_id: str = None, name: str = None) -> np.Profile:
         """Generate an rng nanopub profile."""
         return np.Profile(
-            orcid_id=self.orcid_url(),
-            name=self.name(),
+            orcid_id=self.orcid_url() if orcid_id is None else orcid_id,
+            name=self.name() if name is None else name,
         )
 
     def np_base(self, assertion: rdf.Graph, conf: np.NanopubConf, np_type: rdf.URIRef) -> np.Nanopub:
@@ -178,6 +178,18 @@ class NanopubFaker(Faker):
             rdf.Literal(self.paragraph(nb_sentences=3), lang='en')
         ))
         return self.np_base(a, conf, TEST.Comment)
+        
+    def np_retract(self, conf: np.NanopubConf, to_retract: np.Nanopub) -> np.Nanopub:
+        """Create a retraction for a given nanopub."""
+        a = rdf.Graph()
+        a.add(
+            (
+                rdf.URIRef(conf.profile.orcid_id),
+                NPX.retracts,
+                rdf.URIRef(to_retract.source_uri),
+            )
+        )
+        return self.np_base(a, conf, NPX.retracts)
 
     def np_update(self, conf: np.NanopubConf, supersede: np.Nanopub) -> np.Nanopub:
         """Generate a nanopub updating a different nanopub or any other IRI."""
