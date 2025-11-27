@@ -1,3 +1,7 @@
 .venv/
 .idea/
 /nanopub_generator/logs
+/logs
+__pycache__/
+*.pyc
+.DS_Store
