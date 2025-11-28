@@ -10,10 +10,16 @@ Install the project:
 uv sync
 ```
 
-Then run it like this:
+To run the nanopub generator workload:
 
 ```bash
-uv run nanopub_generator --registry-url <url_to_post_nanopubs_to>
+uv run nanopub_generator --mode=registry --registry-url <nanopub_registry_url>
+```
+
+To run the query workload:
+
+```bash
+uv run nanopub_generator --mode=query --query-url <nanopub_query_url>
 ```
 
 More options are available:
@@ -21,6 +27,8 @@ More options are available:
 ```bash
 uv run nanopub_generator --help
 ```
+
+Modify the `config.yaml` file to configure the workload parameters.
 
 ## Notes
 
