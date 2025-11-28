@@ -48,6 +48,14 @@ query:
           ?subject ?predicate ?object .
         }
 
+    # Count nanopubs by type (aggregation)
+    - weight: 2
+      query: |
+        prefix npx: <http://purl.org/nanopub/x/>
+        select ?type (count(?np) as ?count) where {
+          ?np npx:hasNanopubType ?type .
+        } group by ?type
+
 
 # Nanopublication template configuration
 nanopubs:
