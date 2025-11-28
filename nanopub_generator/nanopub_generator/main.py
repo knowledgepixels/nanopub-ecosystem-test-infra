@@ -36,6 +36,11 @@ parser.add_argument(
     type=str,
     help="Mode for generator pipeline. Possible values: registry, query. Required.",
 )
+parser.add_argument(
+    "--verbose",
+    action="store_true",
+    help="If set, enable verbose logging (will print error details).",
+)
 
 
 def verify_test_instance(url: str) -> None:
@@ -128,6 +133,7 @@ def run_query(args: Namespace, config: dict):
                 pubkeys,
                 custom_endpoints,
                 config["query"],
+                args.verbose,
             )
             for i in range(config["query"]["users"]["count"])
         ]

@@ -17,8 +17,8 @@ def fetch(url: str, endpoint: str) -> List[str]:
         raise Exception(f"HTTP {response.status_code}: {response.reason}")
 
 
-def run_query_user(user_id, pubkeys, custom_endpoints, query):
-    user = QueryUser(user_id, pubkeys, custom_endpoints, query)
+def run_query_user(user_id, pubkeys, custom_endpoints, query, verbose: bool):
+    user = QueryUser(user_id, pubkeys, custom_endpoints, query, verbose)
     user.start_querying()
 
 
@@ -29,6 +29,7 @@ class QueryUser:
         pubkeys: List[str],
         custom_endpoints: dict[str, float],
         query: dict,
+        verbose: bool,
     ) -> None:
         self.user_id = user_id
         # Every user gets a separate seed
@@ -40,6 +41,7 @@ class QueryUser:
         self.queries = [q["query"] for q in query["queries"]]
         self.query_ids = list(range(len(self.queries)))  # List of query IDs
         self.query_weights = [q["weight"] for q in query["queries"]]
+        self.verbose = verbose
 
     def _select_query(self) -> int:
         return self.rng.choices(
@@ -115,6 +117,11 @@ class QueryUser:
         try:
             response = requests.get(endpoint_url, params=params, timeout=self.timeout)
             end_timestamp = time.time()
+            if self.verbose:
+                print(
+                    f"User {self.user_id:02}: Queried {endpoint_url} with query ID {query_id}. "
+                    f"Status code: {response.status_code}, Time elapsed: {response.elapsed.total_seconds():.3f} s"
+                )
         except requests.exceptions.ReadTimeout as e:
             end_timestamp = time.time()
             print(f"User {self.user_id:02}: Read timeout for query {query_id} on endpoint {endpoint_url}")
