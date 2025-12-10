@@ -41,6 +41,11 @@ parser.add_argument(
     action="store_true",
     help="If set, enable verbose logging (will print error details).",
 )
+parser.add_argument(
+    "--end-after-seconds",
+    type=int,
+    help="If set, end the generator after the specified number of seconds.",
+)
 
 
 def verify_test_instance(url: str) -> None:
@@ -106,9 +111,14 @@ def run_registry(args: Namespace, config: dict):
     )
 
     print("Nanopub generator started. Press Ctrl+C to stop.")
+    start_time = time.time()
     while True:
         schedule.run_pending()
         time.sleep(1)
+        if args.end_after_seconds and (time.time() - start_time) >= args.end_after_seconds:
+            print(f"Ending generator after {args.end_after_seconds} seconds as requested.")
+            break
+    print("Nanopub generator stopped.")
 
 def run_query(args: Namespace, config: dict):
     if not args.query_url:
@@ -139,9 +149,20 @@ def run_query(args: Namespace, config: dict):
         ]
         print("Querying started. Press Ctrl+C to stop.")
 
+        start_time = time.time()
         try:
-            for future in futures:
-                future.result()  # Catch any exceptions from processes
+            while True:
+                schedule.run_pending()
+                time.sleep(1)
+                if args.end_after_seconds and (time.time() - start_time) >= args.end_after_seconds:
+                    print(f"Ending querying after {args.end_after_seconds} seconds as requested.")
+                    for pid in executor._processes:
+                        os.kill(pid, 9)
+                    break
+                if all(f.done() for f in futures):
+                    for future in futures:
+                        future.result()  # Catch any exceptions from processes
+                    break
         except KeyboardInterrupt:
             print("\nReceived Ctrl+C, shutting down...")
         except Exception as e:
@@ -149,7 +170,7 @@ def run_query(args: Namespace, config: dict):
             print(traceback.format_exc())
         finally:
             print("\nCleaning up resources...")
-            executor.shutdown(wait=False)
+            executor.shutdown(wait=True, cancel_futures=True)
             return None
 
 
