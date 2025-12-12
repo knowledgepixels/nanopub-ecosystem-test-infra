@@ -67,55 +67,6 @@ application:
   tolerations: []
   affinity: {}
 
-# Component application values
-glrc:
-  tier: external
-  image:
-    repository: docker.io/clariah/grlc
-    pullPolicy: IfNotPresent
-    tag: "v1.3.9"
-    # Overrides the image tag whose default is the chart appVersion.
-
-  replicaCount: 1
-
-  service:
-    type: ClusterIP
-    nodePort: ""
-    port: 80
-    targetPort: 80
-    containerPort: 80
-    protocol: TCP
-
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
-
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 3
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  podSecurityContext: {}
-    # fsGroup: 2000
-
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
-
-
-  imagePullSecrets: []
-  tolerations: []
-  affinity: {}
 
 # Component rdf4j values
 rdf4j:

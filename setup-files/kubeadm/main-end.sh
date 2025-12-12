@@ -15,9 +15,9 @@ sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
 rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 
 systemctl restart containerd
-systemctl restart kubectl
+systemctl restart kubelet
 
-helm install openebs openebs/openebs   --set engines.replicated.mayastor.enabled=false  --set loki.minio.persistence.enabled=false --set loki.localpvScConfig.enabled=false --set engines.local.lvm.enabled=false   --set engines.local.zfs.enabled=false   --namespace openebs   --create-namespace
+helm install openebs --namespace openebs openebs/openebs --set engines.replicated.mayastor.enabled=false --create-namespace
 
 # Change networking to ipvs and restart kube-proxy (we have to do this to enable round robin load balancing)
 kubectl get configmap kube-proxy -n kube-system -o json | \
@@ -36,5 +36,5 @@ kubectl apply -f -
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.15.2/config/manifests/metallb-native.yaml
 
 # Configure MetalLB with a range of IPs - you can change this to your needs
-kubectl apply -f ./metallb-config.yaml
+kubectl apply -f ./metal-config.yaml
 kubectl apply -f ./metal-l2-ad.yaml
