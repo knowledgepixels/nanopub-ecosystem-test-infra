@@ -13,8 +13,8 @@ enablerNodeSelector: {}
 application:
   tier: external
   image:
-    repository: docker.io/nanopub/registry
-    pullPolicy: IfNotPresent
+    repository: kneverblink/registry
+    pullPolicy: Always
     tag: "latest"
     # Overrides the image tag whose default is the chart appVersion.
 
