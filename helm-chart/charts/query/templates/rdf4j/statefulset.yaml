@@ -54,6 +54,9 @@ spec:
               mountPath: {{ .Values.rdf4j.persistenceLogs.mountPath | quote }}
             - name: "data-{{include "rdf4j.fullname" .}}"
               mountPath: {{ .Values.rdf4j.persistence.mountPath | quote }}
+          env:
+            - name: JAVA_OPTS
+            - value: {{ .Values.rdf4j.javaOpts}}
           {{- with .Values.rdf4j.envVars }}
           {{- end }}
   volumeClaimTemplates:
