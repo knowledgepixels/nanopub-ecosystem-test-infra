@@ -57,7 +57,7 @@ spec:
           {{- with .Values.rdf4j.envVars }}
           env:
             - name: JAVA_OPTS
-              value: {{ .Values.rdf4j.javaOpts}}
+              value: "{{ .Values.rdf4j.javaOpts }}"
           {{- end }}
   volumeClaimTemplates:
     - metadata:

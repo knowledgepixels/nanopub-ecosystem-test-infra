@@ -77,7 +77,7 @@ application:
 # Component rdf4j values
 rdf4j:
   tier: internal
-  # To modivy the JAVA OPTS RDF4J starts with
+  # To modify the JAVA OPTS RDF4J starts with
   javaOpts: "-Dorg.eclipse.rdf4j.client.http.connectionTimeout=10000 -Dorg.eclipse.rdf4j.client.http.connectionRequestTimeout=10000 -Dorg.eclipse.rdf4j.client.http.socketTimeout=10000"
 
   image:
