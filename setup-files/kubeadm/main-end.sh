@@ -18,6 +18,8 @@ systemctl restart containerd
 systemctl restart kubelet
 
 helm install openebs --namespace openebs openebs/openebs --set engines.replicated.mayastor.enabled=false --create-namespace
+kubectl patch storageclass openebs-hostpath \
+  -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
 # Change networking to ipvs and restart kube-proxy (we have to do this to enable round robin load balancing)
 kubectl get configmap kube-proxy -n kube-system -o json | \
