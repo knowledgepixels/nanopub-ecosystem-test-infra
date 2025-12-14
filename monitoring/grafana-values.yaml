@@ -26,6 +26,18 @@ datasources:
         isDefault: false
         version: 1
 
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: "default"
+        orgId: 1
+        folder: ""
+        disableDeletion: true
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+
 dashboardsConfigMaps:
   default: grafana-dashboard
 
