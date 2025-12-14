@@ -33,11 +33,12 @@ fi
 
 # Remove taints from master nodes to allow scheduling
 kubectl taint nodes $(kubectl get nodes --selector=node-role.kubernetes.io/master | awk 'FNR==2{print $1}') node-role.kubernetes.io/master-
+kubectl taint nodes $(kubectl get nodes --selector=node-role.kubernetes.io/master | awk 'FNR==2{print $1}') node-role.kubernetes.io/control-plane:NoSchedule-
 
 # Install the monitoring stack on the master node
-
+kubectl apply -f monitoring/grafana-dashboards/dashboard.yaml -n monitoring
 helm upgrade --install vms vm/victoria-metrics-single -f monitoring/vm-values.yaml --set server.nodeSelector.nodeSelectorLabel="master" --namespace="monitoring" --create-namespace
-helm upgrade --install prometheus prometheus-community/prometheus -f monitoring/prometheus-values.yaml --set kube-state-metrics.enabled="false" --set prometheus.server.nodeSelector.nodeSelectorLabel="master" --namespace="monitoring" --create-namespace
+helm upgrade --install prometheus prometheus-community/prometheus -f monitoring/prometheus-values.yaml --set prometheus.server.nodeSelector.nodeSelectorLabel="master" --namespace="monitoring" --create-namespace
 helm upgrade --install grafana grafana/grafana -f monitoring/grafana-values.yaml --set nodeSelector.nodeSelectorLabel="master" --namespace="monitoring" --create-namespace
 
 # Set up monitoring to be persistent

@@ -59,3 +59,17 @@ spec:
               value: "http://{{ include "rdf4j.fullname" .}}:8080/rdf4j-server/"
             - name: REGISTRY_FIXED_URL
               value: "http://{{ .Release.Name }}-registry-application:9292/"
+          volumeMounts:
+            - name: '{{ include "application.fullname" . }}-data'
+              mountPath: {{.Values.application.persistence.mountPath | quote }}
+  volumeClaimTemplates:
+    - metadata:
+        name: '{{ include "application.fullname" . }}-data'
+      spec:
+        accessModes:
+        {{- range .Values.application.persistence.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.application.persistence.size | quote }}
