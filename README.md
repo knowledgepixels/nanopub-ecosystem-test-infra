@@ -47,7 +47,7 @@ helm repo add grafana https://grafana.github.io/helm-charts
 helm install grafana grafana/grafana -f monitoring/grafana-values.yaml --namespace="monitoring" --create-namespace
 ```
 
-Grafana will automatically connect to the Prometheus and VM instances configured above. The dashboard will be exposed on the host machine on port `31430`. By default, authentication to the dashboard will be disabled.
+Grafana will automatically connect to the Prometheus and VM instances configured above. The dashboard will be exposed on the host machine on port `31430`. By default, authentication to the dashboard will be disabled. Grafana should be preloaded with select dashboards by default.
 
 ### Multi-node setup
 
