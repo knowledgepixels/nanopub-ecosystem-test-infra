@@ -25,3 +25,7 @@ datasources:
         url: http://prometheus-server:80
         isDefault: false
         version: 1
+
+dashboardsConfigMaps:
+  default: grafana-dashboard
+
