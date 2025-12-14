@@ -30,7 +30,7 @@ systemctl restart kubelet
 apt update && apt install -y containerd
 sudo mkdir /etc/containerd
 sudo containerd config default | sudo tee /etc/containerd/config.toml
-sudo chmod 777 /etc/containerd/config.toml
+sudo chmod 644 /etc/containerd/config.toml
 sudo sed -i 's/            SystemdCgroup = false/            SystemdCgroup = true/' /etc/containerd/config.toml
 sudo systemctl restart containerd
 

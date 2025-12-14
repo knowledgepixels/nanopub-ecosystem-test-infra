@@ -1,3 +1,5 @@
+ip=$1
+
 # We start with disabling swap
 sudo swapoff -a
 # We make it permanent by modifying /etc/fstab
@@ -30,12 +32,12 @@ systemctl restart kubelet
 apt update && apt install -y containerd
 sudo mkdir /etc/containerd
 sudo containerd config default | sudo tee /etc/containerd/config.toml
-sudo chmod 777 /etc/containerd/config.toml
+sudo chmod 644 /etc/containerd/config.toml
 sudo sed -i 's/            SystemdCgroup = false/            SystemdCgroup = true/' /etc/containerd/config.toml
 sudo systemctl restart containerd
 
 # Here, the control plane endpoint is set to a specific private IP of the master node
-sudo kubeadm init --control-plane-endpoint 192.168.8.22
+sudo kubeadm init --control-plane-endpoint $ip
 
 # To set up kubectl to work properly
 mkdir -p $HOME/.kube

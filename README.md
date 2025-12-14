@@ -73,7 +73,7 @@ Minikube requires minimal initial setup, but can be tough to work with more adva
 
 Kubeadm requires a more complex installation at the start, but is more flexible down the line. Here, a setup with `containerd` (container runtime), `cillium` (CNI plugin), and `MetalLB` (load balancer) is described. 
 
-Please first make sure that the IPs specified in `setup-files/kubeadm/metal-config.yaml` fit into your setup - they need to belong to your LAN and be unused by other devices. Then run `setup-files/kubeadm/main-start.sh` on the main node first, follow with `setup-files/kubeadm/worker.sh` on all the worker nodes to properly configure and connect them, and then finish by running `setup-files/kubeadm/main-end.sh` on the main node. 
+Please first make sure that the IPs specified in `setup-files/kubeadm/metal-config.yaml` fit into your setup - they need to belong to your LAN and be unused by other devices. Then run `setup-files/kubeadm/main-start.sh <CONTROL-PLANE-ENDPOINT-IP>` on the main node first, follow with `setup-files/kubeadm/worker.sh` on all the worker nodes to properly configure and connect them, and then finish by running `setup-files/kubeadm/main-end.sh` on the main node. 
 
 ## Backups
 
