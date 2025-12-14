@@ -36,7 +36,7 @@ dashboardProviders:
         orgId: 1
         folder: ""
         disableDeletion: true
-        editable: true
+        allowUiUpdates: false
         options:
           path: /var/lib/grafana/dashboards/default
 
