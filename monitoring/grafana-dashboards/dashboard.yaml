@@ -80,7 +80,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "description": "The CPU usage is computed for the last 5 minutes",
               "fieldConfig": {
@@ -164,7 +164,7 @@ data:
                 {
                   "datasource": {
                     "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
+                    "uid": "prometheus"
                   },
                   "editorMode": "code",
                   "expr": "100* sum by (pod) (\n  rate(container_cpu_usage_seconds_total{\n    namespace=\"default\",\n    pod=~\".*query-application.*\",\n    container!=\"\",\n    image!=\"\"\n  }[5m])\n)",
@@ -179,7 +179,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "description": "The RAM usage is averaged over the last 5 minutes. It is the total, non-reclaimable RAM taken by the container.",
               "fieldConfig": {
@@ -263,7 +263,7 @@ data:
                 {
                   "datasource": {
                     "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
+                    "uid": "prometheus"
                   },
                   "editorMode": "code",
                   "expr": "sum by (pod) (\n  avg_over_time(container_memory_working_set_bytes{\n    namespace=\"default\",\n    pod=~\".*query-application.*\",\n    container!=\"\",\n    image!=\"\"\n  }[5m])\n)",
@@ -278,7 +278,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "description": "CPU usage averaged over last 5 minutes for clarity",
               "fieldConfig": {
@@ -362,7 +362,7 @@ data:
                 {
                   "datasource": {
                     "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
+                    "uid": "prometheus"
                   },
                   "editorMode": "code",
                   "expr": "100 * sum by (pod) (\n  rate(container_cpu_usage_seconds_total{\n    namespace=\"default\",\n    pod=~\".*rdf4j.*\",\n    container!=\"\",\n    image!=\"\"\n  }[5m])\n)",
@@ -377,7 +377,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "description": "The RAM usage is averaged over the last 5 minutes. It is the total, non-reclaimable RAM taken by the container.",
               "fieldConfig": {
@@ -461,7 +461,7 @@ data:
                 {
                   "datasource": {
                     "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
+                    "uid": "prometheus"
                   },
                   "editorMode": "code",
                   "expr": "sum by (pod) (\n  avg_over_time(container_memory_working_set_bytes{\n    namespace=\"default\",\n    pod=~\".*query-rdf4j.*\",\n    container!=\"\",\n    image!=\"\"\n  }[5m])\n)",
@@ -476,7 +476,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "description": "The CPU usage is computed for the last 5 minutes",
               "fieldConfig": {
@@ -560,7 +560,7 @@ data:
                 {
                   "datasource": {
                     "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
+                    "uid": "prometheus"
                   },
                   "editorMode": "code",
                   "expr": "100*sum by (pod) (\n  rate(container_cpu_usage_seconds_total{\n    namespace=\"default\",\n    pod=~\".*registry-application.*\",\n    container!=\"\",\n    image!=\"\"\n  }[5m])\n)",
@@ -575,7 +575,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "description": "The RAM usage is averaged over the last 5 minutes. It is the total, non-reclaimable RAM taken by the container.",
               "fieldConfig": {
@@ -659,7 +659,7 @@ data:
                 {
                   "datasource": {
                     "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
+                    "uid": "prometheus"
                   },
                   "editorMode": "code",
                   "expr": "sum by (pod) (\n  avg_over_time(container_memory_working_set_bytes{\n    namespace=\"default\",\n    pod=~\".*registry-application.*\",\n    container!=\"\",\n    image!=\"\"\n  }[5m])\n)",
@@ -674,7 +674,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "description": "The CPU usage is computed for the last 5 minutes",
               "fieldConfig": {
@@ -758,7 +758,7 @@ data:
                 {
                   "datasource": {
                     "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
+                    "uid": "prometheus"
                   },
                   "editorMode": "code",
                   "expr": "100*sum by (pod) (\n  rate(container_cpu_usage_seconds_total{\n    namespace=\"default\",\n    pod=~\".*registry-db.*\",\n    container!=\"\",\n    image!=\"\"\n  }[5m])\n)",
@@ -773,7 +773,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "description": "The RAM usage is averaged over the last 5 minutes. It is the total, non-reclaimable RAM taken by the container.",
               "fieldConfig": {
@@ -857,7 +857,7 @@ data:
                 {
                   "datasource": {
                     "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
+                    "uid": "prometheus"
                   },
                   "editorMode": "code",
                   "expr": "sum by (pod) (\n  avg_over_time(container_memory_working_set_bytes{\n    namespace=\"default\",\n    pod=~\".*registry-db.*\",\n    container!=\"\",\n    image!=\"\"\n  }[5m])\n)",
@@ -991,7 +991,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1073,7 +1073,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1094,7 +1094,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "description": "For visualization purposes numbers between 0 and 1 are given to the server statuses of the Query",
           "fieldConfig": {
@@ -1177,7 +1177,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1198,7 +1198,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1280,7 +1280,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "builder",
@@ -1301,7 +1301,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1383,7 +1383,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "builder",
@@ -1404,7 +1404,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1486,7 +1486,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "builder",
@@ -1520,7 +1520,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1602,7 +1602,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1621,7 +1621,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "description": "Based on registry state, assigns a numerical value between 0 and 1 to monitor the process of the application becoming ready",
           "fieldConfig": {
@@ -1704,7 +1704,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1723,7 +1723,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1805,7 +1805,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1824,7 +1824,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1906,7 +1906,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1925,7 +1925,7 @@ data:
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -2007,7 +2007,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",

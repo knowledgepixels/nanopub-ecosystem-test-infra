@@ -17,6 +17,7 @@ datasources:
         access: proxy
         url: http://vms-victoria-metrics-single-server:8428
         isDefault: true
+        uid: victoria
         version: 1
 
       - name: Prometheus
@@ -24,6 +25,7 @@ datasources:
         access: proxy
         url: http://prometheus-server:80
         isDefault: false
+        uid: prometheus
         version: 1
 
 dashboardProviders:
