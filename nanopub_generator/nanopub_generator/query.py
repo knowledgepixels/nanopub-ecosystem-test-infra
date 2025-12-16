@@ -88,34 +88,35 @@ class QueryUser:
             BUFFER_SIZE = 20  # Buffer size for statistics
             row_buffer = []  # last 20 rows for statistics
             total_queries = 0
-            while True:
-                endpoint = self._select_endpoint()
-                row = self._run_sparql_query(endpoint, self._select_query())
-                row_buffer.append(row)
-                total_queries += 1
-                if len(row_buffer) >= BUFFER_SIZE:
-                    query_times = [
-                        r[4] for r in row_buffer
-                        if r[1] == "ok"
-                    ]
-                    query_time = (sum(query_times) / 1e3) / len(query_times) if query_times else 0
-                    row_buffer.clear()
-                    print(
-                        f"User {self.user_id:02}: "
-                        f"Status: {row[1]}, "
-                        f"Total queries: {total_queries}, "
-                        f"Successful queries: {len(query_times)} / {BUFFER_SIZE}, "
-                        f"Avg query time: {query_time:.2f} ms"
-                    )
-                writer.writerow(
-                    row
-                )  # Buffering is set to 1, so no manual flushing needed
+            with requests.Session() as session: # use individual session for each user
+                while True:
+                    endpoint = self._select_endpoint()
+                    row = self._run_sparql_query(endpoint, self._select_query(), session)
+                    row_buffer.append(row)
+                    total_queries += 1
+                    if len(row_buffer) >= BUFFER_SIZE:
+                        query_times = [
+                            r[4] for r in row_buffer
+                            if r[1] == "ok"
+                        ]
+                        query_time = (sum(query_times) / 1e3) / len(query_times) if query_times else 0
+                        row_buffer.clear()
+                        print(
+                            f"User {self.user_id:02}: "
+                            f"Status: {row[1]}, "
+                            f"Total queries: {total_queries}, "
+                            f"Successful queries: {len(query_times)} / {BUFFER_SIZE}, "
+                            f"Avg query time: {query_time:.2f} ms"
+                        )
+                    writer.writerow(
+                        row
+                    )  # Buffering is set to 1, so no manual flushing needed
 
-    def _run_sparql_query(self, endpoint_url, query_id):
+    def _run_sparql_query(self, endpoint_url, query_id, session):
         params = {"query": self.queries[query_id]}
         start_timestamp = time.time()
         try:
-            response = requests.get(endpoint_url, params=params, timeout=self.timeout)
+            response = session.get(endpoint_url, params=params, timeout=self.timeout)
             end_timestamp = time.time()
             if self.verbose:
                 print(
