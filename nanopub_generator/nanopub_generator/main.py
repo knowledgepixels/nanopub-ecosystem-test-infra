@@ -106,15 +106,19 @@ def run_registry(args: Namespace, config: dict):
 
     generator = NanopubGenerator(config, args)
     # Schedule the nanopub publishing task
-    schedule.every(config["generator"]["post_interval"] / 1000).seconds.do(
-        generator.publish_nanopub_safe,
-    )
+    if config["generator"]["post_interval"] > 0:
+        schedule.every(config["generator"]["post_interval"] / 1000).seconds.do(
+            generator.publish_nanopub_safe,
+        )
+        nanopub_publish_func = schedule.run_pending
+    # or proceed as is for faster publishing if post_interval = 0
+    else:
+        nanopub_publish_func = generator.publish_nanopub_safe
 
     print("Nanopub generator started. Press Ctrl+C to stop.")
     start_time = time.time()
     while True:
-        schedule.run_pending()
-        time.sleep(1)
+        nanopub_publish_func()
         if args.end_after_seconds and (time.time() - start_time) >= args.end_after_seconds:
             print(f"Ending generator after {args.end_after_seconds} seconds as requested.")
             break

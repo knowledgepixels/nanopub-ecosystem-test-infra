@@ -26,8 +26,8 @@ class NanopubGenerator:
                     NanopubConf(
                         use_server=self.registry_url,
                         profile=profile,
-                        add_prov_generated_time=True,
-                        add_pubinfo_generated_time=True,
+                        add_prov_generated_time=False,
+                        add_pubinfo_generated_time=False,
                         attribute_publication_to_profile=True,
                         attribute_assertion_to_profile=True,
                     )
@@ -80,8 +80,8 @@ class NanopubGenerator:
                         account_orcid,
                         self.np_accounts_map[account_orcid][0].profile.name,
                     ),
-                    add_prov_generated_time=True,
-                    add_pubinfo_generated_time=True,
+                    add_prov_generated_time=False,
+                    add_pubinfo_generated_time=False,
                     attribute_publication_to_profile=True,
                     attribute_assertion_to_profile=True,
                 )
@@ -109,8 +109,8 @@ class NanopubGenerator:
                 NanopubConf(
                     use_server=self.registry_url,
                     profile=profile,
-                    add_prov_generated_time=True,
-                    add_pubinfo_generated_time=True,
+                    add_prov_generated_time=False,
+                    add_pubinfo_generated_time=False,
                     attribute_publication_to_profile=True,
                     attribute_assertion_to_profile=True,
                 )
