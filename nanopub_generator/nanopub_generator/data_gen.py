@@ -96,7 +96,7 @@ class NanopubFaker(Faker):
             pubinfo=p,
         )
         # generate timestamps here for more precise control
-        timestamp = datetime.now()-timedelta(hours=1)
+        timestamp = datetime.now()-timedelta(hours=2)
         nanopub.pubinfo.add((
             rdf.URIRef("http://purl.org/nanopub/temp/np#"),
             rdf.URIRef("http://www.w3.org/ns/prov#generatedAtTime"),
