@@ -57,7 +57,7 @@ joined=""
 for i in $(seq 1 $replicas); do
     joined+="http://nanopub-$i-registry-application:9292/"
     if [ $i -lt $replicas ]; then
-        joined+=";"
+        joined+=" "
     fi
 done
 

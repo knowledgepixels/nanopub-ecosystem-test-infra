@@ -54,11 +54,13 @@ spec:
             - name: REGISTRY_DB_HOST
               value: {{ include "db.fullname" . }}
             - name: REGISTRY_TEST_INSTANCE
-              value: "true"
+              value: "false"
             - name: REGISTRY_SERVICE_URL
               value: "http://{{ include "application.fullname" . }}:{{ .Values.application.service.port }}"
             - name: REGISTRY_PEER_URLS
               value: {{ .Values.application.registryPeerUrls | quote }}
+            - name: REGISTRY_PRIORITIZE_ALL_PUBKEYS
+              value: "true"
           volumeMounts:
             - name: setting-trig
               mountPath: /data

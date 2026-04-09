@@ -15,12 +15,12 @@ application:
   image:
     repository: nanopub/registry
     pullPolicy: Always
-    tag: "latest"
+    tag: "1.8.0"
     # Overrides the image tag whose default is the chart appVersion.
 
   replicaCount: 1
 
-  registryPeerUrls: ""
+  registryPeerUrls: "https://registry.petapico.org/ https://registry.knowledgepixels.com/"
 
   service:
     type: NodePort
