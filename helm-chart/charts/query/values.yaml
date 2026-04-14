@@ -79,7 +79,7 @@ rdf4j:
   tier: internal
   javaOpts: "-Dorg.eclipse.rdf4j.client.http.connectionTimeout=10000 -Dorg.eclipse.rdf4j.client.http.connectionRequestTimeout=10000 -Dorg.eclipse.rdf4j.client.http.socketTimeout=10000"
   image:
-    repository: nanopub/rdf4j-workbench
+    repository: ostrzyciel/rdf4j-workbench-tomcat
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: "5.2.2-SNAPSHOT-b"
@@ -93,13 +93,11 @@ rdf4j:
     containerPort: 8080
     protocol: TCP
 
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources: 
+    limits:
+      memory: 4Gi
+    requests:
+      memory: 4Gi
 
   autoscaling:
     enabled: false

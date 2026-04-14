@@ -15,7 +15,7 @@ application:
   image:
     repository: nanopub/registry
     pullPolicy: Always
-    tag: "1.8.0"
+    tag: "1.8.1"
     # Overrides the image tag whose default is the chart appVersion.
 
   replicaCount: 1
@@ -86,13 +86,11 @@ db:
     containerPort: 27017
     protocol: TCP
 
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources: 
+    limits:
+      memory: 4Gi
+    requests:
+      memory: 4Gi
 
   autoscaling:
     enabled: false
