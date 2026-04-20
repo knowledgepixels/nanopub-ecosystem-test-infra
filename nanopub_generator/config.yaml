@@ -1,6 +1,6 @@
 generator:
   # Interval in milliseconds between posts
-  post_interval: 2000
+  post_interval: 0
   # Random seed for reproducibility
   seed: 42
 
@@ -26,8 +26,7 @@ query:
   # Probability of choosing a specific repository for a query
   # Otherwise, a random pubkey or type repository is chosen
   probabilities_endpoints:
-    full: 0.1
-    last30d: 0.1
+    {}
 
   # Queries to run against the repository
   # The weights are relative and determine query frequency in the query mix.
