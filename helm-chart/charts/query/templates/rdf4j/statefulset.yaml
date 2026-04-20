@@ -54,6 +54,10 @@ spec:
               mountPath: {{ .Values.rdf4j.persistenceLogs.mountPath | quote }}
             - name: "data-{{include "rdf4j.fullname" .}}"
               mountPath: {{ .Values.rdf4j.persistence.mountPath | quote }}
+            - name: rdf4j-logback
+              mountPath: /var/rdf4j/Server/conf/logback.xml
+              subPath: logback.xml
+              readOnly: true
           env:
             - name: JAVA_OPTS
               value: {{ .Values.rdf4j.javaOpts }}
@@ -90,3 +94,7 @@ spec:
         resources:
           requests:
             storage: {{ .Values.rdf4j.persistenceLogs.size | quote }}
+  volumes: 
+    - name: rdf4j-logback
+      configMap:
+        name: rdf4j-logback

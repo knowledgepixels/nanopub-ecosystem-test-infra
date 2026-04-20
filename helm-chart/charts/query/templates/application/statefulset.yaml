@@ -59,6 +59,16 @@ spec:
               value: "http://{{ include "rdf4j.fullname" .}}:8080/rdf4j-server/"
             - name: REGISTRY_FIXED_URL
               value: "http://{{ .Release.Name }}-registry-application:9292/"
+            - name: NANOPUB_QUERY_ENABLE_TRUST_STATE
+              value: "false"
+            - name: NANOPUB_QUERY_ENABLE_SPACES
+              value: "false"
+            - name: NANOPUB_QUERY_ENABLE_FULL_REPO
+              value: "false"
+            - name: NANOPUB_QUERY_ENABLE_TEXT_REPO
+              value: "false"
+            - name: NANOPUB_QUERY_ENABLE_LAST30D_REPO
+              value: "false"
           volumeMounts:
             - name: '{{ include "application.fullname" . }}-data'
               mountPath: {{.Values.application.persistence.mountPath | quote }}
