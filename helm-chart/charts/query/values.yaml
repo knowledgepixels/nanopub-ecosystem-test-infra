@@ -8,7 +8,7 @@ application:
   image:
     repository: nanopub/query
     pullPolicy: Always
-    tag: "latest"
+    tag: "1.10.0"
     # Overrides the image tag whose default is the chart appVersion.
 
   replicaCount: 1
@@ -79,10 +79,10 @@ rdf4j:
   tier: internal
   javaOpts: "-Dorg.eclipse.rdf4j.client.http.connectionTimeout=10000 -Dorg.eclipse.rdf4j.client.http.connectionRequestTimeout=10000 -Dorg.eclipse.rdf4j.client.http.socketTimeout=10000"
   image:
-    repository: nanopub/rdf4j-workbench
+    repository: ostrzyciel/rdf4j-workbench-tomcat
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "5.1.3-SNAPSHOT"
+    tag: "5.2.2-SNAPSHOT-b"
 
   replicaCount: 1
   service:
@@ -93,13 +93,11 @@ rdf4j:
     containerPort: 8080
     protocol: TCP
 
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources: 
+    limits:
+      memory: 8Gi
+    requests:
+      memory: 8Gi
 
   autoscaling:
     enabled: false

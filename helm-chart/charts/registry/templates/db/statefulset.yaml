@@ -54,7 +54,7 @@ spec:
             - containerPort: {{ .Values.db.service.containerPort }}
               protocol: {{ .Values.db.service.protocol }}
           command: ["/bin/bash"]
-          args: ["-c", 'echo "rs.initiate()" > /docker-entrypoint-initdb.d/1-init-replicaset.js && /usr/local/bin/docker-entrypoint.sh mongod --replSet rs0 --bind_ip_all --noauth']
+          args: ["-c", 'echo "rs.initiate()" > /docker-entrypoint-initdb.d/1-init-replicaset.js && /usr/local/bin/docker-entrypoint.sh mongod --replSet rs0 --bind_ip_all --noauth --wiredTigerCacheSizeGB=1.5']
           volumeMounts:
             - name: "{{ include "db.fullname" . }}-data"
               mountPath: {{.Values.db.persistence.mountPath | quote }}
