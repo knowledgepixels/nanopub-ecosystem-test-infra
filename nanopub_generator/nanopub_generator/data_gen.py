@@ -2,6 +2,9 @@ from faker import Faker
 import nanopub as np
 from random import Random
 import rdflib as rdf
+from rdflib.namespace import XSD
+
+from datetime import datetime, timedelta
 
 from distribution import ParetoDistList, ParetoDist
 from recent_nanopubs import RecentNanopubs
@@ -87,11 +90,24 @@ class NanopubFaker(Faker):
             NPX.hasNanopubType,
             np_type
         ))
-        return np.Nanopub(
+        nanopub =  np.Nanopub(
             conf=conf,
             assertion=assertion,
             pubinfo=p,
         )
+        # generate timestamps here for more precise control
+        timestamp = datetime.now()-timedelta(hours=2)
+        nanopub.pubinfo.add((
+            rdf.URIRef("http://purl.org/nanopub/temp/np#"),
+            rdf.URIRef("http://www.w3.org/ns/prov#generatedAtTime"),
+            rdf.Literal(timestamp, datatype=XSD.dateTime)
+        ))
+        nanopub.provenance.add((
+            rdf.URIRef("http://purl.org/nanopub/temp/np#assertion"),
+            rdf.URIRef("http://www.w3.org/ns/prov#generatedAtTime"),
+            rdf.Literal(timestamp, datatype=XSD.dateTime)
+        ))
+        return nanopub
 
     def add_blank_node(self, g: rdf.Graph) -> rdf.BNode:
         """Add a blank node with some extra information to the graph."""

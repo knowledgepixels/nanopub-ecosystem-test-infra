@@ -1,12 +1,12 @@
 generator:
   # Interval in milliseconds between posts
-  post_interval: 2000
+  post_interval: 0
   # Random seed for reproducibility
   seed: 42
 
   users:
     # Number of users to generate
-    count: 10
+    count: 50
 
 query:
   # Random sample for sampling reproducibility
@@ -21,13 +21,15 @@ query:
 
   users:
     # Number of users making requests in parallel
-    count: 10
+    count: 8
 
   # Probability of choosing a specific repository for a query
   # Otherwise, a random pubkey or type repository is chosen
   probabilities_endpoints:
     full: 0.1
     last30d: 0.1
+    # For reproducing experiments for the paper, use:
+    # {}
 
   # Queries to run against the repository
   # The weights are relative and determine query frequency in the query mix.

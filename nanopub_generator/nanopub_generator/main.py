@@ -36,6 +36,12 @@ parser.add_argument(
     type=str,
     help="Mode for generator pipeline. Possible values: registry, query. Required.",
 )
+
+parser.add_argument(
+    "--check-test-instance",
+    action="store_false",
+    help="If set, checks that specified registry instance is in the test mode. ",
+)
 parser.add_argument(
     "--verbose",
     action="store_true",
@@ -98,23 +104,27 @@ def run_registry(args: Namespace, config: dict):
         if not args.registry_url:
             print("Error: --registry-url is required when not in dry-run mode.")
             return 1
-        try:
-            verify_test_instance(args.registry_url)
-        except Exception as e:
-            print(f"Error verifying registry URL: {e}")
-            return 1
-
+        if args.check_test_instance:
+            try:
+                verify_test_instance(args.registry_url)
+            except Exception as e:
+                print(f"Error verifying registry URL: {e}")
+                return 1
     generator = NanopubGenerator(config, args)
     # Schedule the nanopub publishing task
-    schedule.every(config["generator"]["post_interval"] / 1000).seconds.do(
-        generator.publish_nanopub_safe,
-    )
+    if config["generator"]["post_interval"] > 0:
+        schedule.every(config["generator"]["post_interval"] / 1000).seconds.do(
+            generator.publish_nanopub_safe,
+        )
+        nanopub_publish_func = schedule.run_pending
+    # or proceed as is for faster publishing if post_interval = 0
+    else:
+        nanopub_publish_func = generator.publish_nanopub_safe
 
     print("Nanopub generator started. Press Ctrl+C to stop.")
     start_time = time.time()
     while True:
-        schedule.run_pending()
-        time.sleep(1)
+        nanopub_publish_func()
         if args.end_after_seconds and (time.time() - start_time) >= args.end_after_seconds:
             print(f"Ending generator after {args.end_after_seconds} seconds as requested.")
             break
