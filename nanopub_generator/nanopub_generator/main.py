@@ -36,6 +36,12 @@ parser.add_argument(
     type=str,
     help="Mode for generator pipeline. Possible values: registry, query. Required.",
 )
+
+parser.add_argument(
+    "--check-test-instance",
+    action="store_false",
+    help="If set, checks that specified registry instance is in the test mode. ",
+)
 parser.add_argument(
     "--verbose",
     action="store_true",
@@ -98,12 +104,12 @@ def run_registry(args: Namespace, config: dict):
         if not args.registry_url:
             print("Error: --registry-url is required when not in dry-run mode.")
             return 1
-        # try:
-        #     verify_test_instance(args.registry_url)
-        # except Exception as e:
-        #     print(f"Error verifying registry URL: {e}")
-        #     return 1
-
+        if args.check_test_instance:
+            try:
+                verify_test_instance(args.registry_url)
+            except Exception as e:
+                print(f"Error verifying registry URL: {e}")
+                return 1
     generator = NanopubGenerator(config, args)
     # Schedule the nanopub publishing task
     if config["generator"]["post_interval"] > 0:
