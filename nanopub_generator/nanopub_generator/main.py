@@ -53,6 +53,12 @@ parser.add_argument(
     help="If set, end the generator after the specified number of seconds.",
 )
 
+parser.add_argument(
+    "--end-after-nanopubs-submitted",
+    type=int,
+    help="If set, end the generator after the specified number of submitted nanopublications.",
+)
+
 
 def verify_test_instance(url: str) -> None:
     """Verify that the provided URL points a test instance of the Nanopub Registry."""
@@ -128,6 +134,9 @@ def run_registry(args: Namespace, config: dict):
         nanopub_publish_func()
         if args.end_after_seconds and (time.time() - start_time) >= args.end_after_seconds:
             print(f"Ending generator after {args.end_after_seconds} seconds as requested.")
+            break
+        if generator.counter_nanopubs == args.end_after_nanopubs_submitted:
+            print(f"Ending generator after {args.end_after_nanopubs_submitted} nanopubs as requested.")
             break
     print("Nanopub generator stopped.")
 

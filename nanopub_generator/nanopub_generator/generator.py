@@ -188,8 +188,9 @@ class NanopubGenerator:
             recent_nps.remove_retracted(recent_pub)
         else:
             raise NotImplementedError(f"Unsupported nanopub type: {np_type}")
-
         pub.sign()
+        o = next(pub.rdf.objects(None, rdf.URIRef("http://purl.org/nanopub/x/hasNanopubType")), None)
+        print(f"Type {o} submitted to registry {registry}")
         recent_nps.update_recent_nanopubs(pub, np_type)
         if self.dry_run:
             print("\n---- Dry run: Would publish nanopub: ----\n")
