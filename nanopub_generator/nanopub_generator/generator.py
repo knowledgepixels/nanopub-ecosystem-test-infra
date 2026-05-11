@@ -1,4 +1,6 @@
 from collections import deque
+import itertools
+import copy
 from random import Random
 
 from nanopub import *
@@ -7,24 +9,35 @@ from constants import *
 from data_gen import NanopubFaker
 from recent_nanopubs import RecentNanopubs
 from distribution import ParetoDistList, ParetoDist
-
+import rdflib as rdf
 
 class NanopubGenerator:
     def __init__(self, config: dict, args):
         self.dry_run = args.dry_run
         self.config = config
         self.rng = Random(config["generator"]["seed"])
-        self.recent_nps = RecentNanopubs(config, self.rng)
-        self.fake = NanopubFaker(config, self.rng, self.recent_nps)
         self.counter_nanopubs = 0
-        self.registry_url = args.registry_url
+        self.registry_urls = [item.strip() for item in args.registry_urls.split(',')]
+        self.recent_nps_list = [RecentNanopubs(config, self.rng) for registry in self.registry_urls]
+        self.faker_list = [NanopubFaker(config, self.rng, self.recent_nps_list[registry]) for registry in range(len(self.registry_urls))]
+        self.range_registries = range(len(self.registry_urls))
+        self.schedule = itertools.cycle(self.range_registries) # publish to registries in cycle
+        type_count = config["nanopubs"]["plain_assertion"]["type_count"]
+        overlap_per_registry = round(type_count/len(self.registry_urls))
+        if len(self.registry_urls) > 1:
+            for registry_num in range(len(self.registry_urls)):
+                self.faker_list[registry_num].nanopub_types = ParetoDistList([
+                    rdf.URIRef(f"https://example.org/types#{np_type%type_count}") # take mod so to not overflow the total type count
+                    for np_type in range(registry_num*overlap_per_registry, (registry_num*overlap_per_registry+overlap_per_registry*2))
+                ], self.rng)
+               
         # Create users
         self.pareto_pubkeys = ParetoDist(self.rng, 1, 50, 5.5)
         self.np_accounts_map = {
             profile.orcid_id: deque(
                 [
                     NanopubConf(
-                        use_server=self.registry_url,
+                        use_server= self.registry_urls[0] if len(self.registry_urls) == 1 else None,
                         profile=profile,
                         add_prov_generated_time=False,
                         add_pubinfo_generated_time=False,
@@ -35,7 +48,7 @@ class NanopubGenerator:
                 maxlen=self.pareto_pubkeys.sample(),
             )
             for _ in range(config["generator"]["users"]["count"])
-            for profile in [self.fake.np_profile()]
+            for profile in [self.faker_list[0].np_profile()] # generate profiles from one NanopubFaker regardless of registries
         }
         self.update_accounts_details()
         self.accounts_to_complete = [
@@ -75,8 +88,8 @@ class NanopubGenerator:
             account_orcid = self.rng.choice(self.accounts_to_complete)
             self.np_accounts_map[account_orcid].append(
                 NanopubConf(
-                    use_server=self.registry_url,
-                    profile=self.fake.np_profile(
+                    use_server=self.registry_urls[0] if len(self.registry_urls) == 1 else None,
+                    profile=self.faker_list[0].np_profile( # generate profiles from one NanopubFaker regardless of registries
                         account_orcid,
                         self.np_accounts_map[account_orcid][0].profile.name,
                     ),
@@ -103,11 +116,11 @@ class NanopubGenerator:
         self.update_accounts_details()
 
     def add_account(self):
-        profile = self.fake.np_profile()
+        profile = self.faker_list[0].np_profile() # generate profiles from one NanopubFaker regardless of registries
         account = deque(
             [
                 NanopubConf(
-                    use_server=self.registry_url,
+                    use_server=self.registry_urls[0] if len(self.registry_urls) == 1 else None,
                     profile=profile,
                     add_prov_generated_time=False,
                     add_pubinfo_generated_time=False,
@@ -133,33 +146,37 @@ class NanopubGenerator:
     def publish_nanopub(self) -> None:
         np_account = self.np_accounts_list.sample_item()
         np_type = self.choose_nanopub_type()
+        registry = next(self.schedule)# self.rng.choice(self.range_registries) choose next registry, can also be random
+        print(f"Selected registry: {registry}: {self.registry_urls[registry]}")
+        faker = self.faker_list[registry] # choose appropriate NanopubFaker
+        recent_nps = self.recent_nps_list[registry] # recent nanopubs also depend on registry
         if len(np_account) == 1:
-            np_config = np_account[0]
+            np_config = copy.copy(np_account[0])
         else:
             select_pubkey = ParetoDist(self.rng, 0, len(np_account) - 1, 1)
-            np_config = np_account[select_pubkey.sample()]
-
+            np_config = copy.copy(np_account[select_pubkey.sample()])
+        np_config.use_server = self.registry_urls[registry] # modify profile to use selected registry, config is stored within np, so it is reused for updates/retractions
         if np_type == NP_TYPE_PLAIN:
-            pub = self.fake.np_about_paper(np_config)
+            pub = faker.np_about_paper(np_config)
         elif np_type == NP_TYPE_COMMENT:
-            recent_pub = self.recent_nps.get_recent_nanopub()
+            recent_pub = recent_nps.get_recent_nanopub()
             if recent_pub is None:
                 print("No recent nanopub to comment on.")
                 return
-            pub = self.fake.np_comment(np_config, recent_pub.source_uri)
+            pub = faker.np_comment(np_config, recent_pub.source_uri)
         elif np_type == NP_TYPE_UPDATE:
-            recent_pub = self.recent_nps.get_recent_nanopub(NP_TYPE_PLAIN)
+            recent_pub = recent_nps.get_recent_nanopub(NP_TYPE_PLAIN)
             if recent_pub is None:
                 print("No recent plain nanopub to update.")
                 return
             poster_config = self.find_nanopub_posting_config(recent_pub)
-            pub = self.fake.np_update(poster_config, recent_pub)
+            pub = faker.np_update(poster_config, recent_pub)
         elif np_type == NP_TYPE_RETRACT:
             # Retract random np (but not another retraction)
             nt_type_to_retract = self.rng.choice(
                 [NP_TYPE_PLAIN, NP_TYPE_UPDATE, NP_TYPE_COMMENT]
             )
-            recent_pub = self.recent_nps.get_recent_nanopub(nt_type_to_retract)
+            recent_pub = recent_nps.get_recent_nanopub(nt_type_to_retract)
             if recent_pub is None:
                 print(
                     f"Failed to find a recent publication of type {nt_type_to_retract} to retract"
@@ -167,13 +184,14 @@ class NanopubGenerator:
                 return
             # Find the original configuration for the recent nanopub to reuse
             poster_config = self.find_nanopub_posting_config(recent_pub)
-            pub = self.fake.np_retract(poster_config, recent_pub)
-            self.recent_nps.remove_retracted(recent_pub)
+            pub = faker.np_retract(poster_config, recent_pub)
+            recent_nps.remove_retracted(recent_pub)
         else:
             raise NotImplementedError(f"Unsupported nanopub type: {np_type}")
-
         pub.sign()
-        self.recent_nps.update_recent_nanopubs(pub, np_type)
+        o = next(pub.rdf.objects(None, rdf.URIRef("http://purl.org/nanopub/x/hasNanopubType")), None)
+        print(f"Type {o} submitted to registry {registry}")
+        recent_nps.update_recent_nanopubs(pub, np_type)
         if self.dry_run:
             print("\n---- Dry run: Would publish nanopub: ----\n")
             print(pub)

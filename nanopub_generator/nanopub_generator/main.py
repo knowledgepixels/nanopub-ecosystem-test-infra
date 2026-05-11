@@ -13,8 +13,8 @@ from query import fetch, run_query_user
 
 parser = argparse.ArgumentParser(description="Nanopub generator")
 parser.add_argument(
-    "--registry-url",
-    help="URL of the Registry endpoint for publishing nanopubs. Required if not in dry-run mode and mode set to registry.",
+    "--registry-urls",
+    help="URL(s) of the Registry endpoint(s) for publishing nanopubs. Required if not in dry-run mode and mode set to registry. If multiple registires supplied, a string of urls divided by commas is expected, e.g., ur1,url2,url3",
 )
 parser.add_argument(
     "--query-url",
@@ -38,9 +38,9 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--check-test-instance",
-    action="store_false",
-    help="If set, checks that specified registry instance is in the test mode. ",
+    "--skip-check-test-instance",
+    action="store_true",
+    help="If provided, skips check that specified registry instance is in the test mode. ",
 )
 parser.add_argument(
     "--verbose",
@@ -51,6 +51,12 @@ parser.add_argument(
     "--end-after-seconds",
     type=int,
     help="If set, end the generator after the specified number of seconds.",
+)
+
+parser.add_argument(
+    "--end-after-nanopubs-submitted",
+    type=int,
+    help="If set, end the generator after the specified number of submitted nanopublications.",
 )
 
 
@@ -67,7 +73,6 @@ def verify_test_instance(url: str) -> None:
     assert r.headers["Nanopub-Registry-Test-Instance"] == "true", (
         f"{url} is not a test instance of the Nanopub Registry"
     )
-
 
 def run():
     args = parser.parse_args()
@@ -101,15 +106,17 @@ def run():
 def run_registry(args: Namespace, config: dict):
     if not args.dry_run:
         # Verify the registry URL
-        if not args.registry_url:
+        if not args.registry_urls:
             print("Error: --registry-url is required when not in dry-run mode.")
             return 1
-        if args.check_test_instance:
-            try:
-                verify_test_instance(args.registry_url)
-            except Exception as e:
-                print(f"Error verifying registry URL: {e}")
-                return 1
+        registries_urls = [item.strip() for item in args.registry_urls.split(',')]
+        if not args.skip_check_test_instance:
+            for registy_url in registries_urls:
+                try:
+                    verify_test_instance(registy_url)
+                except Exception as e:
+                    print(f"Error verifying registry URL: {e}")
+                    return 1
     generator = NanopubGenerator(config, args)
     # Schedule the nanopub publishing task
     if config["generator"]["post_interval"] > 0:
@@ -127,6 +134,9 @@ def run_registry(args: Namespace, config: dict):
         nanopub_publish_func()
         if args.end_after_seconds and (time.time() - start_time) >= args.end_after_seconds:
             print(f"Ending generator after {args.end_after_seconds} seconds as requested.")
+            break
+        if generator.counter_nanopubs == args.end_after_nanopubs_submitted:
+            print(f"Ending generator after {args.end_after_nanopubs_submitted} nanopubs as requested.")
             break
     print("Nanopub generator stopped.")
 
